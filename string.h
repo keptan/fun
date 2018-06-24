@@ -27,6 +27,10 @@ public:
 	String (const char* str)
 		: List<char>(strList(str, strlen(str)))
 	{}
+
+	String (const List<char> l)
+		: List<char>(l)
+	{}
 };
 
 #endif
