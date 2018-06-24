@@ -3,6 +3,10 @@
 
 #include <memory>
 
+//singly linked list 
+//nodes are shared between list tails thanks to being persistent 
+//ref counted with shared_ptr 
+//ref counted child node 
 template<typename T> 
 struct ListNode 
 {
@@ -14,6 +18,7 @@ struct ListNode
 	{}
 };
 
+//just a node and a few constructors 
 template <typename T>
 struct List 
 {
@@ -32,6 +37,7 @@ struct List
 	{}
 };
 
+//0 length for empty lists, 1 is just a node, 2+ has tail 
 template<typename T>
 int length (const List<T> l)
 {
@@ -45,12 +51,14 @@ int length (const List<T> l)
 	return 1 + length(List<T>(l.head->next));
 }
 
+//a->b .. c->a->b 
 template <typename T>
 List<T> push (const List<T> l, const T res)
 {
 	return List<T>(res, l.head);
 }
 
+//a->b .. a
 template <typename T>
 T peek (const List<T> l) //returns first element of List 
 {
@@ -60,6 +68,7 @@ T peek (const List<T> l) //returns first element of List
 	throw std::out_of_range("peeking a List of size zero");
 }
 
+//a->b->c .. b->->c
 template <typename T>
 List<T> pop (const List<T> l) //a->b .. b-> 
 {
@@ -69,6 +78,7 @@ List<T> pop (const List<T> l) //a->b .. b->
 	return List<T>(); 
 }
 
+//a->b->c .. c
 template<typename T>
 T peek_back (const List<T> l) //returns last element of a List 
 {
@@ -78,6 +88,7 @@ T peek_back (const List<T> l) //returns last element of a List
 	return peek(l); 
 }
 
+//a->b->c .. //na->nb 
 template<typename T>
 List<T> pop_back (const List<T> l) //returns the List minus the tail element a-b-c .. na-b 
 {
@@ -92,6 +103,7 @@ List<T> pop_back (const List<T> l) //returns the List minus the tail element a-b
 	return List<T>(); 
 };
 
+//a->b->c , d->e->f ... na->nb->nc->d->e->f 
 template<typename T>
 List<T> push (const List<T> a, const List<T> b)
 {
@@ -106,6 +118,7 @@ List<T> push (const List<T> a, const List<T> b)
 	return push( pop_back(a), push(b, peek_back(a)));
 }
 
+//a->b .. na->nb->c
 template<typename T>
 List<T> push_back (const List<T> l, const T res)
 {
@@ -118,6 +131,7 @@ List<T> push_back (const List<T> l, const T res)
 	return List<T>(peek(l), List<T>(res).head);
 }
 
+//a->b->c, d->e->f ... n(d->e->f->a->b->c)
 template<typename T>
 List<T> push_back (const List<T> a, const List<T> b)
 {
