@@ -55,6 +55,9 @@ int length (const List<T> l)
 template <typename T>
 List<T> push (const List<T> l, const T res)
 {
+	if(length(l) == 0)
+		return List<T>(res);
+
 	return List<T>(res, l.head);
 }
 
@@ -126,7 +129,7 @@ List<T> push_back (const List<T> l, const T res)
 		return List<T>(res);
 
 	if(length(l) > 1)
-		return push( peek(l), push_back( pop(l), res));
+		return push(push_back( pop(l), res), peek(l));
 
 	return List<T>(peek(l), List<T>(res).head);
 }

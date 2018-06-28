@@ -10,22 +10,23 @@ int strlen (const char* s, const int l = 0)
 		return strlen(s, l + 1);
 	}
 
-	return l - 1;
+	return l ;
 }
 
-List<char> strList (const char* str, const int len, const int back = 0)
+List<char> strList (const char* str)
 {
-	if(len != back)
-		return push( strList(str, len, back + 1), str[back]);
+	if(*str)
+		return push( strList( str + 1), *str);
 
-	return List<char>(str[len]);
+	return List<char>(nullptr);
 }
 
+//pretty much a typedef and two constructors 
 class String : public List<char>
 {
 public:
 	String (const char* str)
-		: List<char>(strList(str, strlen(str)))
+		: List<char>(strList(str))
 	{}
 
 	String (const List<char> l)
