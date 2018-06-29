@@ -11,7 +11,7 @@ bool ordOverload (const T a, const T b)
 }
 
 template <typename T, typename F = Ord<T>>
-T max (const T a, const T b, F compare = ordOverload)
+T max (const T a, const T b, const F compare = ordOverload)
 {
 	if(compare(a,b) == compare(b,a))
 		return a; 
@@ -21,7 +21,7 @@ T max (const T a, const T b, F compare = ordOverload)
 }
 
 template <typename T, typename F = Ord<T>>
-T min (const T a, const T b, F compare = ordOverload)
+T min (const T a, const T b, const F compare = ordOverload)
 {
 	if(compare(a,b) == compare(b,a))
 		return b; 
@@ -31,7 +31,7 @@ T min (const T a, const T b, F compare = ordOverload)
 }
 
 template <typename T, typename F = Ord<T>>
-bool sorted (const List<T> l, F compare = ordOverload)
+bool sorted (const List<T> l, const F compare = ordOverload)
 {
 	if(length(l) < 2)
 		return true; 
@@ -60,18 +60,36 @@ List<List<T>> shuffleSplit (const List<T> l, const List<T> a= List<T>(), const L
 	return shuffleSplit (pop(l), push(smaller, peek(l)), larger);
 }
 
+/*
 template <typename T, typename F = Ord<T>>
-List<T> mergeOrdered (const List<T> a, const List<T> b, F compare = ordOverload, const List<T> out = List<T>())
+List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOverload, const List<T> out = List<T>())
 {
 	if(length(a) == 0 ||  length(b) == 0)
 		return push_back(out, push(a, b));
 
-	const auto c = [&](const auto first, const auto second){ return compare(peek_back(first), peek_back(second));};
+	const auto c = [=](const auto first, const auto second){ return compare(peek_back(first), peek_back(second));};
 
 	const List<T> larger =  max(a,b,c);
 	const List<T> smaller = min(a,b,c);
 
+	mergeCounter++;
+
 	return mergeOrdered(pop_back(larger), smaller,  compare, push(out, peek_back(larger)));
+}
+*/
+
+template <typename T, typename F = Ord<T>>
+List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOverload)
+{
+	if(length(a) == 0 ||  length(b) == 0)
+		return push(a, b);
+
+	const auto c = [=](const auto first, const auto second){ return compare(peek(first), peek(second));};
+
+	const List<T> larger =  max(a,b,c);
+	const List<T> smaller = min(a,b,c);
+
+	return push(List<T>(peek(smaller)), mergeOrdered(pop(smaller), larger));
 }
 
 template <typename T, typename F = Ord<T>>
@@ -80,16 +98,9 @@ List<T> mergeSort (const List<T> l, const F compare = ordOverload)
 	if(sorted(l, compare))
 		return l; 
 
-	const auto splits = shuffleSplit(l); 
-	const auto first  = mergeSort(peek(splits), compare); 
-	const auto second = mergeSort(peek_back(splits), compare); 
-
-	/*
-	const auto firstL = [=](const List<T> ad){return mergeSort(ad,compare);};
-
-	auto first = std::async (firstL, peek(splits));
-	auto  second = std::async (firstL, peek_back(splits));
-	*/
+	const auto split = shuffleSplit(l); 
+	const auto first  = mergeSort(peek(split), compare); 
+	const auto second = mergeSort(peek_back(split), compare); 
 
 	return mergeOrdered(first,second, compare);
 }
