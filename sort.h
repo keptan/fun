@@ -1,34 +1,9 @@
+#ifndef SORT_H
+#define SORT_H 
+
 #include "list.h" 
 #include "string.h" 
-
-template <typename T>
-using Ord  = bool(T,T);
-
-template <typename T>
-bool ordOverload (const T a, const T b)
-{
-	return a > b;
-}
-
-template <typename T, typename F = Ord<T>>
-T max (const T a, const T b, const F compare = ordOverload)
-{
-	if(compare(a,b) == compare(b,a))
-		return a; 
-
-	const T max =  compare(a,b) ? a : b;
-	return max; 
-}
-
-template <typename T, typename F = Ord<T>>
-T min (const T a, const T b, const F compare = ordOverload)
-{
-	if(compare(a,b) == compare(b,a))
-		return b; 
-
-	const T min =  compare(a,b) ? b : a;
-	return min;
-}
+#include "utility.h"
 
 template <typename T, typename F = Ord<T>>
 bool sorted (const List<T> l, const F compare = ordOverload)
@@ -86,4 +61,6 @@ List<T> mergeSort (const List<T> l, const F compare = ordOverload)
 
 	return mergeOrdered(first,second, compare);
 }
+
+#endif
 	
