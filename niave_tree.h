@@ -61,6 +61,57 @@ int height (const NiaveTree<T> tree)
 }
 
 template <typename T>
+bool balanced (const NiaveTree<T> tree)
+{
+	if(tree.head == nullptr)
+		return true;
+
+	const int left = height(NiaveTree<T>(tree.head->left));
+	const int right = height(NiaveTree<T>(tree.head->right));
+
+	if ( max(left, right) - min(left, right) < 2)
+		return true;
+
+	return false;
+}
+
+
+template <typename T>
+NiaveTree<T> rotateLeft (const NiaveTree<T> tree)
+{
+	if(height(NiaveTree<T>(tree.head->right)) == 0)
+		return tree; 
+
+	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+
+	const SharedNode Head = tree.head;
+	const SharedNode A = Head->right;
+	const SharedNode B = (A == nullptr ? nullptr : A->left);
+	const SharedNode C = Head->left;
+
+	return  NiaveTree<T>( A->res, std::make_shared<NiaveTreeNode<T>>(Head->res, C, B), A->right);
+
+};
+
+template <typename T>
+NiaveTree<T> rotateRight (const NiaveTree<T> tree)
+{
+	if(height(NiaveTree<T>(tree.head->left)) == 0)
+		return tree; 
+
+	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+
+	const SharedNode Head = tree.head;
+
+	const SharedNode A = Head->left;
+	const SharedNode B = (A == nullptr ? nullptr : A->right);
+	const SharedNode C = Head->right;
+
+	return  NiaveTree<T>( A->res, A->left, std::make_shared<NiaveTreeNode<T>>(Head->res, B, C));
+
+};
+
+template <typename T>
 NiaveTree<T> push (const NiaveTree<T> tree, const T res)
 {
 
