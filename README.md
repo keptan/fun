@@ -1,7 +1,7 @@
 # fun
 fun library for use in cutegrab 
 
-persistant data structures 
+persistent data structures 
 
 declarative and pure functional style 
 
