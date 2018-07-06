@@ -2,6 +2,7 @@
 #define LIST_H 
 
 #include <memory>
+#include <initializer_list>
 
 //singly linked list 
 //nodes are shared between list tails thanks to being persistent 
@@ -48,7 +49,7 @@ int length (const List<T> l)
 		return 1;
 
 	//inline pop 
-	return 1 + length(List<T>(l.head->next));
+	return 1 + length<T>(l.head->next);
 }
 
 //a->b .. c->a->b 
@@ -131,7 +132,7 @@ List<T> push_back (const List<T> l, const T res)
 	if(length(l) > 1)
 		return push(push_back( pop(l), res), peek(l));
 
-	return List<T>(peek(l), List<T>(res).head);
+	return List<T>(peek(l), std::make_shared<ListNode<T>>(res));
 }
 
 //a->b->c, d->e->f ... n(d->e->f->a->b->c)
@@ -151,5 +152,16 @@ std::ostream& operator<< (std::ostream& os, const List<T>& l)
 
 	return os;
 }
+
+template<typename T>
+List<T> initBuild (const std::initializer_list<T> init, int pos = 0)
+{
+	if(pos + 1 >= init.size())
+		return List<T>(nullptr);
+
+	return push( List<T>(*(init.begin() + pos)), initBuild(init, pos + 1 ));
+
+}
+
 
 #endif

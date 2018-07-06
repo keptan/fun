@@ -2,6 +2,7 @@
 #define SORT_H 
 
 #include "list.h" 
+#include "niave_tree.h"
 #include "string.h" 
 #include "utility.h"
 

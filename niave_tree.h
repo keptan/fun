@@ -1,6 +1,7 @@
 #ifndef NIAVE_TREE_H
 #define NIAVE_TREE_H 
 #include "utility.h" 
+#include "list.h"
 
 template<typename T>
 struct NiaveTreeNode
@@ -24,7 +25,7 @@ struct NiaveTree
 	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
 	const SharedNode head; 
 
-	NiaveTree (SharedNode h)
+	NiaveTree (const SharedNode h)
 		:head(h)
 	{}
 
@@ -119,10 +120,10 @@ NiaveTree<T> push (const NiaveTree<T> tree, const T res)
 		return NiaveTree<T>(res);
 
 	if(res < tree.head->res)
-		return NiaveTree<T>(res, push( NiaveTree<T>(tree.head->left), res).head, tree.head->right);
+		return NiaveTree<T>(tree.head->res, push( NiaveTree<T>(tree.head->left), res).head, tree.head->right);
 
 	if(res > tree.head->res)
-		return NiaveTree<T>(res, tree.head->left, push( NiaveTree<T>(tree.head->right), res).head);
+		return NiaveTree<T>(tree.head->res, tree.head->left, push( NiaveTree<T>(tree.head->right), res).head);
 
 	return tree.head;
 }
