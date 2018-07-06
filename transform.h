@@ -53,7 +53,7 @@ T fold (const List<T> list, T init, F fun)
 template <typename T, typename F = T(T)>
 NiaveTree<T> map (const NiaveTree<T> tree, F fun)
 {
-	return ListToTree(map(TreeToList(tree), fun))
+	return ListToTree(map(TreeToList(tree), fun));
 }
 
 template <typename T, typename F = T(T,T)>
