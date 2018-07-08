@@ -142,6 +142,21 @@ List<T> push_back (const List<T> a, const List<T> b) //combines two lists togeth
 	return push(b,a);
 }
 
+//need to unify how we're traversing, because we're pushing_back innificiently to append which is retarded 
+//use map for <<
+//maybe pop_back is needed there being slow again
+template<typename T>
+List<T> operator+ (const List<T> a, const T b)
+{
+	return push_back(a, b);
+}
+
+template<typename T>
+List<T> operator+ (const T a, const List<T> b)
+{
+	return push(b, a);
+}
+
 //replace with an IO monad or something
 template<typename T>
 std::ostream& operator<< (std::ostream& os, const List<T>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 

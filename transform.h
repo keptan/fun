@@ -17,7 +17,7 @@ List<T> TreeToList (const NiaveTree<T> tree, const List<T> list = List<T>(nullpt
 	const auto left  = TreeToList<T>(tree.head->left, list);
 	const auto right = TreeToList<T>(tree.head->right, list);
 
-	return push(left, (push(right, tree.head->res)));
+	return push(left, ( push(right, tree.head->res)));
 }
 
 //AHHHHHHHHHH
@@ -38,18 +38,27 @@ List<T> map (const List<T> list, F fun)
 		return List<T>(nullptr);
 
 	if(length(list) == 1)
-		return List<T>(peek(list));
+		return List<T>(fun(peek(list)));
 
 	return push( map(pop(list), fun), fun(peek(list)));
 }
 
 template <typename T, typename F = T(T,T)>
-T fold (const List<T> list, T init, F fun)
+T foldr (const List<T> list, F fun, T init)
 {
 	if (length(list) == 0)
 		return init; 
 
-	return fun( peek(list), fold(pop(list), init, fun));
+	return fun( peek(list), foldr(pop(list), fun, init));
+}
+
+template <typename T, typename F = T(T,T)>
+T foldl (const List<T> list, F fun, T init)
+{
+	if (length(list) == 0)
+		return init; 
+
+	return fun( peek_back(list), foldl(pop_back(list), fun, init));
 }
 
 //should these be implicit conversions?
@@ -61,9 +70,9 @@ NiaveTree<T> map (const NiaveTree<T> tree, F fun)
 }
 
 template <typename T, typename F = T(T,T)>
-T fold (const NiaveTree<T> tree, T init, F fun)
+T fold (const NiaveTree<T> tree, F fun, T init)
 {
-	return ListToTree( fold( TreeToList(tree), init, fun));
+	return ListToTree( fold( TreeToList(tree), fun, init));
 }
 
 #endif
