@@ -4,6 +4,7 @@
 #include "list.h" 
 #include "niave_tree.h"
 #include <iostream>
+#include <functional>
 
 //replace with some kind of traverse generic map -> List push?
 template<typename T>
@@ -27,7 +28,7 @@ NiaveTree<T> ListToTree (const List<T> list, const NiaveTree<T> tree = NiaveTree
 	if (length(list) == 0)
 		return tree;
 
-	return ListToTree(pop(list), push(tree, peek(list)));
+	return ListToTree(pop(list), peek(list) + tree);
 }
 
 
@@ -43,8 +44,8 @@ List<T> map (const List<T> list, F fun)
 	return fun(peek(list)) + map(pop(list), fun);
 }
 
-template <typename T, typename F = T(T,T)>
-T foldr (const List<T> list, F fun, T init)
+template <typename T, typename G, typename F = std::function<G(T,G)>>
+G foldr (const List<T> list, F fun, G init)
 {
 	if (length(list) == 0)
 		return init; 
@@ -52,8 +53,8 @@ T foldr (const List<T> list, F fun, T init)
 	return fun( peek(list), foldr(pop(list), fun, init));
 }
 
-template <typename T, typename F = T(T,T)>
-T foldl (const List<T> list, F fun, T init)
+template <typename T, typename G, typename F = std::function<G(T,G)>>
+G foldl (const List<T> list, F fun, G init)
 {
 	if (length(list) == 0)
 		return init; 

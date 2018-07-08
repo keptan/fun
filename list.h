@@ -164,7 +164,6 @@ List<T> operator + (const List<T> a, const List<T> b)
 }
 
 
-
 //replace with an IO monad or something
 template<typename T>
 std::ostream& operator<< (std::ostream& os, const List<T>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 

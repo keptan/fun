@@ -16,7 +16,7 @@ int strlen (const char* s, const int l = 0)
 List<char> strList (const char* str)
 {
 	if(*str)
-		return push( strList( str + 1), *str);
+		return *str + strList(str +1);
 
 	return List<char>(nullptr);
 }

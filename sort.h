@@ -2,9 +2,9 @@
 #define SORT_H 
 
 #include "list.h" 
-#include "niave_tree.h"
-#include "string.h" 
 #include "utility.h"
+
+int count = 0;
 
 template <typename T, typename F = Ord<T>>
 bool sorted (const List<T> l, const F compare = ordOverload)
@@ -19,35 +19,29 @@ bool sorted (const List<T> l, const F compare = ordOverload)
 }
 
 template <typename T> 
-List<List<T>> shuffleSplit (const List<T> l, const List<T> a = List<T>(), const List<T> b = List<T>())
+List<List<T>> shuffleSplit (const List<T> l, const List<T> larger = List<T>(nullptr), const List<T> smaller = List<T>(nullptr))
 {
-	const auto compare = [](const auto a, const auto b){ return length(a) > length(b);};
-
-	const List<T> larger =  max(a,b,compare);
-	const List<T> smaller = min(a,b,compare);
-
-
 	if(length(l) == 0)
-		return push_back(List<List<T>>(smaller),larger);
+		return larger + List<List<T>>(smaller);
 
 	if(length(l) == 1)
-		return push_back (List<List<T>>( push_back(smaller, peek(l))), larger);
+		return larger + List<List<T>>(smaller + peek(l));
 
-	return shuffleSplit (pop(l), push_back(smaller, peek(l)), larger);
+	return shuffleSplit (pop(l), peek(l) + smaller, larger);
 }
 
 template <typename T, typename F = Ord<T>>
 List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOverload)
 {
 	if(length(a) == 0 ||  length(b) == 0)
-		return push_back(a, b);
+		return a + b;
 
-	const auto c = [=](const auto first, const auto second){ return compare(peek(first), peek(second));};
+	const auto c = [&](const auto first, const auto second){ return compare(peek(first), peek(second));};
 
 	const List<T> larger =  max(a,b,c);
 	const List<T> smaller = min(a,b,c);
 
-	return push_back(List<T>( peek(smaller)), mergeOrdered( pop(smaller), larger));
+	return peek(smaller) + mergeOrdered(pop(smaller), larger);
 }
 
 template <typename T>
@@ -56,7 +50,9 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload)
 	if(sorted(l, compare))
 		return l; 
 
-	const auto split = shuffleSplit(l); 
+
+	count += 1;
+	const auto split  = shuffleSplit(l); 
 	const auto first  = mergeSort( peek(split), compare); 
 	const auto second = mergeSort( peek_back(split), compare); 
 
