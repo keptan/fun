@@ -50,8 +50,8 @@ List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOve
 	return push(List<T>( peek(smaller)), mergeOrdered( pop(smaller), larger));
 }
 
-template <typename T, typename F = Ord<T>>
-List<T> mergeSort (const List<T> l, const F compare = ordOverload)
+template <typename T>
+List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload)
 {
 	if(sorted(l, compare))
 		return l; 
@@ -62,6 +62,20 @@ List<T> mergeSort (const List<T> l, const F compare = ordOverload)
 
 	return mergeOrdered(first,second, compare);
 }
+
+//we would have checks during debug, but then trust during release?
+//a lazy sorted list would return the 1st biggest and then second biggest ect 
+//would a lazy sorted list even be more efficient? 
+//assert that sorted, or actually construct mergesort? 
+/*
+template <typename T>
+struct SortedList<T> : public List<T>
+{
+	public:
+	*/
+	
+	
+
 
 #endif
 	

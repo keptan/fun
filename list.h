@@ -14,7 +14,7 @@ struct ListNode
 	const T res; 
 	const std::shared_ptr<ListNode<T>> next; 
 
-	ListNode (T r, const std::shared_ptr<ListNode<T>> n = nullptr)
+	ListNode (const T r, const std::shared_ptr<ListNode<T>> n = nullptr)
 		:res(r), next(n)
 	{}
 };
@@ -54,7 +54,7 @@ int length (const List<T> l)
 
 //a->b .. c->a->b 
 template <typename T>
-List<T> push (const List<T> l, const T res)
+List<T> push (const List<T> l, const T res) //pushes an element to the head of a list
 {
 	if(length(l) == 0)
 		return List<T>(res);
@@ -72,9 +72,9 @@ T peek (const List<T> l) //returns first element of List
 	throw std::out_of_range("peeking a List of size zero");
 }
 
-//a->b->c .. b->->c
+//a->b->c .. b->c
 template <typename T>
-List<T> pop (const List<T> l) //a->b .. b-> 
+List<T> pop (const List<T> l) //returns a list where the head is gone 
 {
 	if(length(l) > 1)
 		return List<T>(l.head->next);
@@ -84,7 +84,7 @@ List<T> pop (const List<T> l) //a->b .. b->
 
 //a->b->c .. c
 template<typename T>
-T peek_back (const List<T> l) //returns last element of a List 
+T peek_back (const List<T> l) //returns last element of a List
 {
 	if(length(l) > 1)
 		return peek_back( pop(l));
@@ -93,7 +93,7 @@ T peek_back (const List<T> l) //returns last element of a List
 }
 
 //a->b->c .. //na->nb 
-template<typename T>
+template<typename T>                //n stands for new node, so in this example we need a new node containing a 
 List<T> pop_back (const List<T> l) //returns the List minus the tail element a-b-c .. na-b 
 {
 	if(length(l) > 1)
@@ -109,7 +109,7 @@ List<T> pop_back (const List<T> l) //returns the List minus the tail element a-b
 
 //a->b->c , d->e->f ... na->nb->nc->d->e->f 
 template<typename T>
-List<T> push (const List<T> a, const List<T> b)
+List<T> push (const List<T> a, const List<T> b) //combines two lists together
 {
 	if(!length(b))
 		return a; 
@@ -124,7 +124,7 @@ List<T> push (const List<T> a, const List<T> b)
 
 //a->b .. na->nb->c
 template<typename T>
-List<T> push_back (const List<T> l, const T res)
+List<T> push_back (const List<T> l, const T res) //puts an element at the back of a list
 {
 	if(!length(l))
 		return List<T>(res);
@@ -137,13 +137,14 @@ List<T> push_back (const List<T> l, const T res)
 
 //a->b->c, d->e->f ... n(d->e->f->a->b->c)
 template<typename T>
-List<T> push_back (const List<T> a, const List<T> b)
+List<T> push_back (const List<T> a, const List<T> b) //combines two lists together, but B is infront of A
 {
 	return push(b,a);
 }
 
+//replace with an IO monad or something
 template<typename T>
-std::ostream& operator<< (std::ostream& os, const List<T>& l)
+std::ostream& operator<< (std::ostream& os, const List<T>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 
 {
 	os << peek(l);
 	
@@ -154,13 +155,12 @@ std::ostream& operator<< (std::ostream& os, const List<T>& l)
 }
 
 template<typename T>
-List<T> initBuild (const std::initializer_list<T> init, int pos = 0)
+List<T> initBuild (const std::initializer_list<T> init, const int pos = 0) //crappy {} constructor, make it a member with a helper function
 {
 	if(pos + 1 >= init.size())
 		return List<T>(nullptr);
 
 	return push( List<T>(*(init.begin() + pos)), initBuild(init, pos + 1 ));
-
 }
 
 

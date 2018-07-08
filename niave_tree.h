@@ -121,10 +121,10 @@ NiaveTree<T> push (const NiaveTree<T> tree, const T res)
 		return NiaveTree<T>(res);
 
 	if(res < tree.head->res)
-		return NiaveTree<T>(tree.head->res, push<T>( tree.head->left, res).head, tree.head->right);
+		return NiaveTree<T>(tree.head->res, push<T>(tree.head->left, res).head, tree.head->right);
 
 	if(res > tree.head->res)
-		return NiaveTree<T>(tree.head->res, tree.head->left, push<T>( tree.head->right, res).head);
+		return NiaveTree<T>(tree.head->res, tree.head->left, push<T>(tree.head->right, res).head);
 
 	return tree.head;
 }

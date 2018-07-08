@@ -3,6 +3,7 @@
 
 #include "list.h" 
 #include "niave_tree.h"
+#include <iostream>
 
 //replace with some kind of traverse generic map -> List push?
 template<typename T>
@@ -13,7 +14,10 @@ List<T> TreeToList (const NiaveTree<T> tree, const List<T> list = List<T>(nullpt
 
 	//lmao autism
 	//make + overloads 
-	return push( push( push( list, TreeToList<T>(tree.head->left, list)), tree.head->res), TreeToList<T>(tree.head->right, list));
+	const auto left  = TreeToList<T>(tree.head->left, list);
+	const auto right = TreeToList<T>(tree.head->right, list);
+
+	return push(left, (push(right, tree.head->res)));
 }
 
 //AHHHHHHHHHH
