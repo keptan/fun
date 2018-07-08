@@ -17,7 +17,7 @@ List<T> TreeToList (const NiaveTree<T> tree, const List<T> list = List<T>(nullpt
 	const auto left  = TreeToList<T>(tree.head->left, list);
 	const auto right = TreeToList<T>(tree.head->right, list);
 
-	return push(left, ( push(right, tree.head->res)));
+	return left + tree.head->res + right;
 }
 
 //AHHHHHHHHHH
@@ -40,7 +40,7 @@ List<T> map (const List<T> list, F fun)
 	if(length(list) == 1)
 		return List<T>(fun(peek(list)));
 
-	return push( map(pop(list), fun), fun(peek(list)));
+	return fun(peek(list)) + map(pop(list), fun);
 }
 
 template <typename T, typename F = T(T,T)>

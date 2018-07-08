@@ -28,26 +28,26 @@ List<List<T>> shuffleSplit (const List<T> l, const List<T> a = List<T>(), const 
 
 
 	if(length(l) == 0)
-		return push(List<List<T>>(smaller),larger);
+		return push_back(List<List<T>>(smaller),larger);
 
 	if(length(l) == 1)
-		return push (List<List<T>>( push(smaller, peek(l))), larger);
+		return push_back (List<List<T>>( push_back(smaller, peek(l))), larger);
 
-	return shuffleSplit (pop(l), push(smaller, peek(l)), larger);
+	return shuffleSplit (pop(l), push_back(smaller, peek(l)), larger);
 }
 
 template <typename T, typename F = Ord<T>>
 List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOverload)
 {
 	if(length(a) == 0 ||  length(b) == 0)
-		return push(a, b);
+		return push_back(a, b);
 
 	const auto c = [=](const auto first, const auto second){ return compare(peek(first), peek(second));};
 
 	const List<T> larger =  max(a,b,c);
 	const List<T> smaller = min(a,b,c);
 
-	return push(List<T>( peek(smaller)), mergeOrdered( pop(smaller), larger));
+	return push_back(List<T>( peek(smaller)), mergeOrdered( pop(smaller), larger));
 }
 
 template <typename T>
