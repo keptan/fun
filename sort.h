@@ -3,6 +3,7 @@
 
 #include "list.h" 
 #include "utility.h"
+#include <future>
 
 int count = 0;
 
@@ -50,13 +51,17 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload)
 	if(sorted(l, compare))
 		return l; 
 
-
-	count += 1;
 	const auto split  = shuffleSplit(l); 
-	const auto first  = mergeSort( peek(split), compare); 
-	const auto second = mergeSort( peek_back(split), compare); 
+	//const auto first  = mergeSort( peek(split), compare); 
+	//const auto second = mergeSort( peek_back(split), compare); 
 
-	return mergeOrdered(first,second, compare);
+	auto first = std::async(std::launch::async, 
+			[&](){return mergeSort(peek(split), compare);});
+
+	auto second = std::async(std::launch::async, 
+			[&](){return mergeSort(peek_back(split), compare);});
+
+	return mergeOrdered(first.get(),second.get(), compare);
 }
 
 //we would have checks during debug, but then trust during release?

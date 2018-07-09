@@ -44,6 +44,21 @@ List<T> map (const List<T> list, F fun)
 	return fun(peek(list)) + map(pop(list), fun);
 }
 
+template <typename T, typename F = bool(T)>
+List<T> filter (const List<T> list, F fun)
+{
+	if (length(list) == 0)
+		return list; 
+
+	const auto out  =  fun(peek(list)) ? List<T>(peek(list)) : List<T>(nullptr);
+
+	return  out + filter(pop(list), fun);
+}
+
+
+
+
+
 template <typename T, typename G, typename F = std::function<G(T,G)>>
 G foldr (const List<T> list, F fun, G init)
 {

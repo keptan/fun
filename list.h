@@ -168,12 +168,12 @@ List<T> operator + (const List<T> a, const List<T> b)
 template<typename T>
 std::ostream& operator<< (std::ostream& os, const List<T>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 
 {
+	if(!length(l))
+		return os;
+
 	os << peek(l);
 	
-	if(length(l) > 1)
-		return operator<< (os, List<T>(pop(l)));
-
-	return os;
+	return operator<< (os, List<T>(pop(l)));
 }
 
 template<typename T>

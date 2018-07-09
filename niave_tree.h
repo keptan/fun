@@ -3,6 +3,8 @@
 #include "utility.h" 
 #include "list.h"
 
+//node that holds resource and points to other members
+//shared by different trees (persistent tree)
 template<typename T>
 struct NiaveTreeNode
 {
@@ -18,6 +20,7 @@ struct NiaveTreeNode
 	{}
 };
 
+//holds a head and some constructors
 template <typename T>
 struct NiaveTree 
 {
@@ -42,33 +45,35 @@ struct NiaveTree
 	{}
 };
 
-//would be prettier if it took a pointer, too bad 
+//returns the number of elements in a tree
 template <typename T>
 int size (const NiaveTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
 
-	return 1 + size(NiaveTree<T>(tree.head->left)) + size(NiaveTree<T>(tree.head->right));
+	return 1 + size<T>(tree.head->left) + size<T>(tree.head->right);
 }
 
+//returns the height of a tree
 template <typename T>
 int height (const NiaveTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
 
-	return  max(1 +  height(NiaveTree<T>(tree.head->left)),  1 + height(NiaveTree<T>(tree.head->right)));
+	return  max(1 +  height<T>(tree.head->left),  1 + height<T>(tree.head->right));
 }
 
+//returns if the tree is balanced
 template <typename T>
 bool balanced (const NiaveTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return true;
 
-	const int left = height(NiaveTree<T>(tree.head->left));
-	const int right = height(NiaveTree<T>(tree.head->right));
+	const int left = height<T>(tree.head->left);
+	const int right = height<T>(tree.head->right);
 
 	if ( max(left, right) - min(left, right) < 2)
 		return true;
@@ -128,5 +133,22 @@ NiaveTree<T> push (const NiaveTree<T> tree, const T res)
 
 	return tree.head;
 }
+
+template<typename T>
+bool contains (const NiaveTree<T> tree, const T res)
+{
+	if(tree.head == nullptr)
+		return false;
+
+	if(res < tree.head->res)
+		return contains<T>(tree.head->left, res);
+
+	if(res > tree.head->res)
+		return contains<T>(tree.head->right, res);
+
+	return true;
+};
+
+
 
 #endif
