@@ -52,16 +52,18 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload)
 		return l; 
 
 	const auto split  = shuffleSplit(l); 
-	//const auto first  = mergeSort( peek(split), compare); 
-	//const auto second = mergeSort( peek_back(split), compare); 
+	const auto first  = mergeSort( peek(split), compare); 
+	const auto second = mergeSort( peek_back(split), compare); 
 
+	/*
 	auto first = std::async(std::launch::async, 
 			[&](){return mergeSort(peek(split), compare);});
 
 	auto second = std::async(std::launch::async, 
 			[&](){return mergeSort(peek_back(split), compare);});
+			*/
 
-	return mergeOrdered(first.get(),second.get(), compare);
+	return mergeOrdered(first,second, compare);
 }
 
 //we would have checks during debug, but then trust during release?
