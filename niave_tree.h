@@ -7,9 +7,9 @@ enum Color {Red, Black};
 //node that holds resource and points to other members
 //shared by different trees (persistent tree)
 template<typename T>
-struct NiaveTreeNode
+struct RBTreeNode
 {
-	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
 
 	Color c;
 
@@ -17,7 +17,7 @@ struct NiaveTreeNode
 	const SharedNode left; 
 	const SharedNode right;
 
-	NiaveTreeNode (Color c, T res , SharedNode l = nullptr 
+	RBTreeNode (Color c, T res , SharedNode l = nullptr 
 						 ,SharedNode  r = nullptr)
 		:c(c), res(res), left(l), right(r)
 	{}
@@ -25,32 +25,32 @@ struct NiaveTreeNode
 
 //holds a head and some constructors
 template <typename T>
-struct NiaveTree 
+struct RBTree 
 {
-	using Node = NiaveTreeNode<T>;
-	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+	using Node = RBTreeNode<T>;
+	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
 	const SharedNode head; 
 
-	NiaveTree (const SharedNode h)
+	RBTree (const SharedNode h)
 		:head(h)
 	{}
 
-	explicit NiaveTree (T res, Color c = Black)
+	explicit RBTree (T res, Color c = Black)
 		: head(std::make_shared<Node>(c, res))
 	{}
 
-	explicit NiaveTree (T res, SharedNode left, SharedNode right, Color c = Black)
+	explicit RBTree (T res, SharedNode left, SharedNode right, Color c = Black)
 		: head(std::make_shared<Node>(c, res, left, right))
 	{}
 
-	explicit NiaveTree (void)
+	explicit RBTree (void)
 		: head(nullptr)
 	{}
 };
 
 //returns the number of elements in a tree
 template <typename T>
-int size (const NiaveTree<T> tree)
+int size (const RBTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
@@ -60,7 +60,7 @@ int size (const NiaveTree<T> tree)
 
 //returns the height of a tree
 template <typename T>
-int height (const NiaveTree<T> tree)
+int height (const RBTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
@@ -69,7 +69,7 @@ int height (const NiaveTree<T> tree)
 }
 
 template <typename T>
-int blackHeight (const NiaveTree<T> tree)
+int blackHeight (const RBTree<T> tree)
 {
 	if (tree.head == nullptr)
 		return 1; 
@@ -81,30 +81,30 @@ int blackHeight (const NiaveTree<T> tree)
 }
 
 template <typename T>
-bool doubleLeft (const NiaveTree<T> tree)
+bool doubleLeft (const RBTree<T> tree)
 {
 	return tree.head && tree.head->c == Red && height<T>(tree.head->left) && tree.head->left->c == Red; 
 }
 
 template <typename T>
-bool doubleRight (const NiaveTree<T> tree)
+bool doubleRight (const RBTree<T> tree)
 {
 	return height(tree) && tree.head->c == Red && height<T>(tree.head->right) && tree.head->right->c == Red;
 }
 
 template <typename T>
-NiaveTree<T> paint (const NiaveTree<T> tree, Color c)
+RBTree<T> paint (const RBTree<T> tree, Color c)
 {
 	if(!height(tree))
 		return tree; 
 
-	return NiaveTree<T>(tree.head->res, tree.head->left, tree.head->right, c);
+	return RBTree<T>(tree.head->res, tree.head->left, tree.head->right, c);
 }
 	
 
 //returns if the tree is balanced
 template <typename T>
-bool balanced (const NiaveTree<T> tree)
+bool balanced (const RBTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return true;
@@ -121,7 +121,7 @@ bool balanced (const NiaveTree<T> tree)
 /*
 //returns if the tree is black balanced 
 template <typename T> 
-bool blackBalanced (const NiaveTree<T> tree)
+bool blackBalanced (const RBTree<T> tree)
 {
 	if(tree.head == nullptr)
 		return true; 
@@ -137,29 +137,29 @@ bool blackBalanced (const NiaveTree<T> tree)
 
 
 template <typename T>
-NiaveTree<T> rotateLeft (const NiaveTree<T> tree)
+RBTree<T> rotateLeft (const RBTree<T> tree)
 {
-	if(height(NiaveTree<T>(tree.head->right)) == 0)
+	if(height(RBTree<T>(tree.head->right)) == 0)
 		throw std::out_of_range("left rotating a list with empty right side");
 
-	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
 
 	const SharedNode Head = tree.head;
 	const SharedNode A = Head->right;
 	const SharedNode B = (A == nullptr ? nullptr : A->left);
 	const SharedNode C = Head->left;
 
-	return  NiaveTree<T>( A->res, std::make_shared<NiaveTreeNode<T>>(Head->res, C, B), A->right);
+	return  RBTree<T>( A->res, std::make_shared<RBTreeNode<T>>(Head->res, C, B), A->right);
 
 };
 
 template <typename T>
-NiaveTree<T> rotateRight (const NiaveTree<T> tree)
+RBTree<T> rotateRight (const RBTree<T> tree)
 {
-	if(height(NiaveTree<T>(tree.head->left)) == 0)
+	if(height(RBTree<T>(tree.head->left)) == 0)
 		throw std::out_of_range("right rotating a list with empty left side");
 
-	using SharedNode = std::shared_ptr<NiaveTreeNode<T>>;
+	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
 
 	const SharedNode Head = tree.head;
 
@@ -167,47 +167,47 @@ NiaveTree<T> rotateRight (const NiaveTree<T> tree)
 	const SharedNode B = (A == nullptr ? nullptr : A->right);
 	const SharedNode C = Head->right;
 
-	return  NiaveTree<T>( A->res, A->left, std::make_shared<NiaveTreeNode<T>>(Head->res, B, C));
+	return  RBTree<T>( A->res, A->left, std::make_shared<RBTreeNode<T>>(Head->res, B, C));
 
 };
 
 template <typename T>
-NiaveTree<T> balance (Color c, T res, NiaveTree<T> left, NiaveTree<T> right)
+RBTree<T> balance (Color c, T res, RBTree<T> left, RBTree<T> right)
 {
 	if ( c == Black && doubleLeft(left))
-		return NiaveTree<T>(
-				left.head->res, paint<T>(left.head->left, Black).head, NiaveTree<T>(res, left.head->right, right.head, Black).head 
+		return RBTree<T>(
+				left.head->res, paint<T>(left.head->left, Black).head, RBTree<T>(res, left.head->right, right.head, Black).head 
 				,Red);
 
 	if (c == Black && doubleRight(left))
-		return NiaveTree<T>(
+		return RBTree<T>(
 				left.head->right->res
-				,NiaveTree<T>(left.head->res, left.head->left, left.head->right->left, Black).head
-				,NiaveTree<T>(res, left.head->right, right.head, Black).head 
+				,RBTree<T>(left.head->res, left.head->left, left.head->right->left, Black).head
+				,RBTree<T>(res, left.head->right, right.head, Black).head 
 				,Red);
 
 	if (c == Black && doubleLeft(right))
-		return NiaveTree<T>(
+		return RBTree<T>(
 				right.head->left->res
-				,NiaveTree<T>(res, left.head, right.head->left->left, Black).head
-				,NiaveTree<T>(right.head->res, right.head->left->right, right.head->right, Black).head
+				,RBTree<T>(res, left.head, right.head->left->left, Black).head
+				,RBTree<T>(right.head->res, right.head->left->right, right.head->right, Black).head
 				,Red);
 
 	if (c == Black && doubleRight(right))
-		return NiaveTree<T>(
+		return RBTree<T>(
 				right.head->res
-				,NiaveTree<T>(res, left.head, right.head->left).head
+				,RBTree<T>(res, left.head, right.head->left).head
 				,paint<T>(right.head->right, Black).head
 				,Red);
 
-	return NiaveTree<T>(res, left.head, right.head, c);
+	return RBTree<T>(res, left.head, right.head, c);
 }
 
 template <typename T>
-NiaveTree<T> invsert (const NiaveTree<T> tree, const T res)
+RBTree<T> invsert (const RBTree<T> tree, const T res)
 {
 	if(tree.head == nullptr)
-		return NiaveTree<T>(res, Red);
+		return RBTree<T>(res, Red);
 
 	T y = tree.head->res; 
 	Color c = tree.head->c;
@@ -223,15 +223,15 @@ NiaveTree<T> invsert (const NiaveTree<T> tree, const T res)
 
 //use ORD? 
 template <typename T>
-NiaveTree<T> push (const NiaveTree<T> tree, const T res)
+RBTree<T> push (const RBTree<T> tree, const T res)
 {
-	const NiaveTree<T> n = invsert(tree, res);
+	const RBTree<T> n = invsert(tree, res);
 
-	return NiaveTree<T>(n.head->res, n.head->left, n.head->right, Black);
+	return RBTree<T>(n.head->res, n.head->left, n.head->right, Black);
 }
 
 template<typename T>
-bool contains (const NiaveTree<T> tree, const T res)
+bool contains (const RBTree<T> tree, const T res)
 {
 	if(tree.head == nullptr)
 		return false;
