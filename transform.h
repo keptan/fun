@@ -28,7 +28,7 @@ NiaveTree<T> ListToTree (const List<T> list, const NiaveTree<T> tree = NiaveTree
 	if (length(list) == 0)
 		return tree;
 
-	return ListToTree(pop(list), peek(list) + tree);
+	return ListToTree(pop(list), push(tree, peek(list)));
 }
 
 
@@ -54,10 +54,6 @@ List<T> filter (const List<T> list, F fun)
 
 	return  out + filter(pop(list), fun);
 }
-
-
-
-
 
 template <typename T, typename G, typename F = std::function<G(T,G)>>
 G foldr (const List<T> list, F fun, G init)
