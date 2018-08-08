@@ -308,7 +308,7 @@ Tree<T> removeOperation (const Tree<T> tree, const T res)
 	{
 
 		const Tree<T> temp = minValueNode<T>(tree.head->right);
-		const  Tree<T> remmed(temp.head->res, tree.head->left, remove<T>(temp.head, temp.head->res).head);
+		const  Tree<T> remmed(temp.head->res, tree.head->left, remove<T>(tree.head->right, temp.head->res).head);
 
 
 		return  writeHeight(remmed, 1 + max( readHeight<T>( remmed.head->left), readHeight<T>(remmed.head->right)));
