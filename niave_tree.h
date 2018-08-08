@@ -117,6 +117,7 @@ int balanced (const Tree<T> tree)
 template <typename T>
 Tree<T> rotateLeft (const Tree<T> tree)
 {
+
 	if(height(Tree<T>(tree.head->right)) == 0)
 		throw std::out_of_range("left rotating a list with empty right side");
 
@@ -138,6 +139,7 @@ Tree<T> rotateLeft (const Tree<T> tree)
 template <typename T>
 Tree<T> rotateRight (const Tree<T> tree)
 {
+
 	assert(height(Tree<T>(tree.head->left)) == readHeight<T>(tree.head->left));
 	if(height(Tree<T>(tree.head->left)) == 0)
 		throw std::out_of_range("right rotating a list with empty left side");
@@ -161,7 +163,6 @@ Tree<T> rotateRight (const Tree<T> tree)
 template <typename T>
 Tree<T> doubleRotateRight (const Tree<T> tree)
 {
-	std::cout << "double right rotate\n";
 
 	return rotateRight<T>( Tree<T>(tree.head->res, rotateLeft<T>(tree.head->left).head , tree.head->right));
 };
@@ -170,7 +171,6 @@ template <typename T>
 Tree<T> doubleRotateLeft (const Tree<T> tree)
 {
 
-	std::cout << "double left rotate\n";
 
 	return rotateLeft<T> ( Tree<T>(tree.head->res, tree.head->left, rotateRight<T>(tree.head->right).head));
 }
@@ -200,7 +200,9 @@ template<typename T>
 Tree<T> removeBalance (const Tree<T> tree, const T key)
 {
 	if(tree.head == nullptr)
+	{
 		return tree; 
+	}
 
 	if (balanced<T>(tree) > 1 && balanced<T>(tree.head->left) >= 0)
 		return rotateRight(tree);
@@ -213,6 +215,7 @@ Tree<T> removeBalance (const Tree<T> tree, const T key)
 
 	if(balanced<T>(tree) < -1 && balanced<T>(tree.head->right) > 0)
 		return doubleRotateLeft(tree);
+
 
 	return tree;
 }
@@ -247,24 +250,54 @@ Tree<T> push (const Tree<T> tree, const T res)
 	return tree.head;
 }
 
-template <typename T>
+template<typename T>
 Tree<T> remove (const Tree<T> tree, const T res)
 {
-	if(tree.head == nullptr)
+	if (!contains(tree, res))
 		return tree; 
+
+	return removeOperation(tree, res);
+}
+
+
+
+template <typename T>
+Tree<T> removeOperation (const Tree<T> tree, const T res)
+{
+	if(tree.head == nullptr)
+	{
+		return tree; 
+	}
+
 
 	T y = tree.head->res; 
 
 	if(res < y)
-		return removeBalance( Tree<T>(y, remove<T>(tree.head->left, res).head, tree.head->right), res);
+	{
+		const Tree<T> niaveRemove = Tree<T>(y, removeOperation<T>(tree.head->left, res).head, tree.head->right);
+		const Tree<T> balanced = removeBalance(niaveRemove, res);
+		return  writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
+
+	}
 
 	if(res > y)
-		return removeBalance( Tree<T>(y, tree.head->left, remove<T>(tree.head->left, res).head), res);
+	{
+		const Tree<T> niaveRemove = Tree<T>(y, tree.head->left, removeOperation<T>(tree.head->right, res).head);
+		const Tree<T> balanced = removeBalance(niaveRemove, res);
+		return  writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
 
-	//one child case
+	}
+
+
+	if(tree.head->left == nullptr && tree.head->right == nullptr)
+	{
+		return Tree<T>(nullptr);
+	}
+
 	if( tree.head->left == nullptr || tree.head->right == nullptr)
 	{
-		const Tree<T> temp = tree.head->left ? tree.head->left : tree.head->right;
+
+		const Tree<T> temp = tree.head->left == nullptr ? tree.head->right : tree.head->left;
 
 		return  writeHeight(temp, 1 + max( readHeight<T>( temp.head->left), readHeight<T>(temp.head->right)));
 
@@ -273,8 +306,9 @@ Tree<T> remove (const Tree<T> tree, const T res)
 	//two child case 
 	else 
 	{
+
 		const Tree<T> temp = minValueNode<T>(tree.head->right);
-		const  Tree<T> remmed  = (temp.head->res, tree.head->left, remove<T>(temp, temp.head->res).head);
+		const  Tree<T> remmed(temp.head->res, tree.head->left, remove<T>(temp.head, temp.head->res).head);
 
 
 		return  writeHeight(remmed, 1 + max( readHeight<T>( remmed.head->left), readHeight<T>(remmed.head->right)));
