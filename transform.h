@@ -6,6 +6,7 @@
 #include <iostream>
 #include <functional>
 
+/*
 //replace with some kind of traverse generic map -> List push?
 template<typename T>
 List<T> TreeToList (const Tree<T> tree, const List<T> list = List<T>(nullptr))
@@ -30,6 +31,7 @@ Tree<T> ListToTree (const List<T> list, const Tree<T> tree = Tree<T>(nullptr))
 
 	return ListToTree(pop(list), push(tree, peek(list)));
 }
+*/
 
 
 template <typename T, typename F = T(T)>
@@ -73,18 +75,6 @@ G foldl (const List<T> list, F fun, G init)
 	return fun( peek_back(list), foldl(pop_back(list), fun, init));
 }
 
-//should these be implicit conversions?
-//also these are all unbalancing if the list gets sorted
-template <typename T, typename F = T(T)>
-Tree<T> map (const Tree<T> tree, F fun)
-{
-	return ListToTree(map(TreeToList(tree), fun));
-}
 
-template <typename T, typename F = T(T,T)>
-T fold (const Tree<T> tree, F fun, T init)
-{
-	return ListToTree( fold( TreeToList(tree), fun, init));
-}
 
 #endif

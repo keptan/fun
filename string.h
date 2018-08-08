@@ -3,27 +3,29 @@
 
 #include "list.h" 
 
-int strlen (const char* s, const int l = 0)
-{
-	if (s[l])
-	{
-		return strlen(s, l + 1);
-	}
 
-	return l ;
-}
-
-List<char> strList (const char* str)
-{
-	if(*str)
-		return *str + strList(str +1);
-
-	return List<char>(nullptr);
-}
 
 //pretty much a typedef and two constructors 
 class String : public List<char>
 {
+	int strlen (const char* s, const int l = 0) const
+	{
+		if (s[l])
+		{
+			return strlen(s, l + 1);
+		}
+
+		return l ;
+	}
+
+	List<char> strList (const char* str) const
+	{
+		if(*str)
+			return *str + strList(str +1);
+
+		return List<char>(nullptr);
+	}
+
 public:
 	String (const char* str)
 		: List<char>(strList(str))
@@ -38,7 +40,7 @@ public:
 template<typename T>
 List<T> operator + (const String  a, const String b)
 {
-	return push_back(a, b);
+	return a.push_back(b);
 }
 
 

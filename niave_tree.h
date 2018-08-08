@@ -1,8 +1,6 @@
 #ifndef NIAVE_TREE_H
 #define NIAVE_TREE_H 
 #include "utility.h" 
-#include <iostream>
-#include <cassert>
 #include "list.h"
 
 //node that holds resource and points to other members
@@ -25,15 +23,212 @@ struct TreeNode
 
 //holds a head and some constructors
 template <typename T>
-struct Tree 
+class Tree 
 {
+
 	using Node = TreeNode<T>;
 	using SharedNode = std::shared_ptr<TreeNode<T>>;
-	const SharedNode head; 
+	SharedNode head; 
 
+
+
+	int readHeight (void) const
+	{
+		if (head == nullptr)
+			return 0; 
+
+		return head->height;
+	}
+
+	Tree writeHeight (int h) const
+	{
+		if (head == nullptr)
+			return *this; 
+
+		return Tree( head->res, head->left, head->right, h);
+	}
+
+	//returns the height of a tree
+	int height (void) const
+	{
+		if (head == nullptr)
+			return 0; 
+
+		return max( Tree(head->left).readHeight(), Tree(head->right).readHeight()) +1;
+	}
+
+	Tree minValueNode (void) const
+	{
+		if (head->left == nullptr)
+			return *this;
+
+		return Tree(head->left).minValueNode();
+	}
+
+
+	//returns if the tree is balanced
+	int balanced (void) const
+	{
+		if(head == nullptr)
+			return 0;
+
+		const int left = Tree(head->left).height();
+		const int right = Tree(head->right).height();
+
+		return left - right;
+
+	}
+
+	Tree rotateLeft (void) const
+	{
+
+		using SharedNode = std::shared_ptr<TreeNode<T>>;
+
+		const SharedNode Head = head;
+		const SharedNode A = Head->right;
+		const SharedNode B = (A == nullptr ? nullptr : A->left);
+		const SharedNode C = Head->left;
+
+		const SharedNode newLeft = std::make_shared<TreeNode<T>>(Head->res, C, B);
+
+		const Tree rotated = Tree(A->res, Tree(newLeft).writeHeight( 1 + max( Tree(newLeft->left).readHeight(), Tree(newLeft->right).readHeight())).head ,A->right);
+
+		return rotated.writeHeight( max( Tree(rotated.head->left).readHeight(), Tree(rotated.head->right).readHeight()) + 1);
+
+	};
+
+	Tree rotateRight (void) const
+	{
+		using SharedNode = std::shared_ptr<TreeNode<T>>;
+
+		const SharedNode Head = head;
+
+		const SharedNode A = Head->left;
+		const SharedNode B = (A == nullptr ? nullptr : A->right);
+		const SharedNode C = Head->right;
+
+		const SharedNode newRight = std::make_shared<TreeNode<T>>(Head->res, B, C);
+		const Tree rotated = Tree(A->res, A->left, Tree(newRight).writeHeight( max( Tree(newRight->left).readHeight(), Tree(newRight->right).readHeight()) + 1).head );
+
+		return rotated.writeHeight( max( Tree(rotated.head->left).readHeight(), Tree(rotated.head->right).readHeight() +1));
+	};
+
+	Tree doubleRotateRight (void) const
+	{
+		return Tree(head->res, Tree(head->left).rotateLeft().head , head->right).rotateRight();
+
+	};
+
+	Tree doubleRotateLeft (void) const
+	{
+
+		return Tree(head->res, head->left, Tree(head->right).rotateRight().head).rotateLeft();
+	}
+
+	Tree insertBalance (const T key) const
+	{
+
+		if (balanced() > 1 && key < head->left->res)
+			return rotateRight();
+
+		if (balanced() < -1 && key > head->right->res)
+			return rotateLeft();
+
+		if (balanced() > 1)
+			return doubleRotateRight();
+
+		if (balanced() < -1)
+			return doubleRotateLeft();
+
+		return *this;
+
+	}
+
+	Tree removeBalance (const T key) const
+	{
+		if(head == nullptr)
+		{
+			return *this; 
+		}
+
+		if (balanced() > 1 && Tree(head->left).balanced() >= 0)
+			return rotateRight();
+
+		if (balanced() > 1 && Tree(head->left).balanced() < 0)
+			return doubleRotateRight();
+
+		if (balanced() < -1 && Tree(head->right).balanced() <= 0)
+			return rotateLeft();
+
+		if (balanced() < -1 && Tree(head->right).balanced() > 0)
+			return doubleRotateLeft();
+
+
+		return *this;
+	}
+
+	Tree removeOperation (const T res) const
+	{
+		if(head == nullptr)
+		{
+			*this;
+		}
+
+
+		T y = head->res; 
+
+		if(res < y)
+		{
+			const Tree niaveRemove = Tree(y, Tree(head->left).removeOperation(res).head, head->right);
+			const Tree balanced = niaveRemove.removeBalance(res);
+
+			return balanced.writeHeight( 1 + max( Tree(balanced.head->left).readHeight(), Tree(balanced.head->right).readHeight())); 
+
+		}
+
+		if(res > y)
+		{
+			const Tree niaveRemove = Tree(y, head->left, Tree(head->right).removeOperation(res).head);
+			const Tree balanced = niaveRemove.removeBalance(res);
+
+			return balanced.writeHeight( 1 + max( Tree(balanced.head->left).readHeight(), Tree(balanced.head->right).readHeight())); 
+		}
+
+
+		if(head->left == nullptr && head->right == nullptr)
+		{
+			return Tree(nullptr);
+		}
+
+		if( head->left == nullptr || head->right == nullptr)
+		{
+
+			const Tree temp = head->left == nullptr ? Tree(head->right) : Tree(head->left);
+
+			return temp.writeHeight( 1 + max( Tree(temp.head->left).readHeight(), Tree(temp.head->right).readHeight()));
+
+		}
+
+		//two child case 
+		else 
+		{
+
+			const Tree temp = Tree(head->right).minValueNode();
+			const Tree remmed = Tree(temp.head->res, head->left, Tree(head->right).remove(temp.head->res).head);
+
+			return remmed.writeHeight( 1 + max( Tree(remmed.head->left).readHeight(),  Tree(remmed.head->right).readHeight()));
+
+		}
+
+	}
+
+
+public:
 	Tree (const SharedNode h)
 		:head(h)
 	{}
+
+
 
 	explicit Tree (T res)
 		: head(std::make_shared<Node>(res))
@@ -46,291 +241,131 @@ struct Tree
 	explicit Tree (void)
 		: head(nullptr)
 	{}
-};
 
-//returns the number of elements in a tree
-template <typename T>
-int size (const Tree<T> tree)
-{
-	if(tree.head == nullptr)
-		return 0;
+	Tree (const Tree& a) 
+		: head(a.head)
+	{}
 
-	return 1 + size<T>(tree.head->left) + size<T>(tree.head->right);
-}
+	Tree (const Tree&& a)
+		: head(a.head)
+	{}
 
-template <typename T>
-int readHeight (const Tree<T> tree)
-{
-	if (tree.head == nullptr)
-		return 0; 
+	Tree& operator = (const Tree& a)
+	{
+		head = a.head;
+		return *this;
+	}
 
-	return tree.head->height;
-}
+	List<T> toList (const List<T> list = List<T>(nullptr)) const
+	{
+		if (head == nullptr)
+			return list;
 
-template <typename T>
-Tree<T> writeHeight (const Tree<T> tree, int h)
-{
-	if (tree.head == nullptr)
-		return tree; 
+		//lmao autism
+		//make + overloads 
+		const auto left  = Tree(head->left).toList(list);
+		const auto right = Tree(head->right).toList(list);
 
-	return Tree<T>( tree.head->res, tree.head->left, tree.head->right, h);
-}
+		return left + head->res + right;
+	}
 
+	//returns the number of elements in a tree
+	int size (void) const
+	{
+		if(head == nullptr)
+			return 0;
 
-//returns the height of a tree
-template <typename T>
-int height (const Tree<T> tree)
-{
-	if (tree.head == nullptr)
-		return 0; 
-
-	return max(readHeight<T>(tree.head->left), readHeight<T>(tree.head->right)) + 1;
-}
-
-template <typename T>
-Tree<T> minValueNode (const Tree<T> tree)
-{
-	if (tree.head->left == nullptr)
-		return tree;
-
-	return minValueNode<T>(tree.head->left);
-}
+		return 1 + Tree(head->left).size() + Tree(head->right).size();
+	}
 
 
-//returns if the tree is balanced
-template <typename T>
-int balanced (const Tree<T> tree)
-{
-	if(tree.head == nullptr)
-		return 0;
+	Tree push (const T res) const
+	{
+		if (head == nullptr)
+			return Tree(res);
 
-	assert(height<T>(tree.head->left) == readHeight<T>(tree.head->left));
-	assert(height<T>(tree.head->right) == readHeight<T>(tree.head->right));
-	const int left = height<T>(tree.head->left);
-	const int right = height<T>(tree.head->right);
+		T y = head->res; 
 
-	return left - right;
+		if(res < head->res)
+		{
+			const Tree niaveInsert = Tree(y, Tree(head->left).push(res).head, head->right);
+			const Tree balanced = niaveInsert.insertBalance(res);
+			const Tree updatedHeight = balanced.writeHeight( 1 + max( Tree(balanced.head->left).readHeight(), Tree(balanced.head->right).readHeight()));
 
-}
+			return updatedHeight;
+		}
+
+		if(res > head->res)
+		{
+
+			const Tree niaveInsert = Tree(y, head->left , Tree(head->right).push(res).head);
+			const Tree balanced = niaveInsert.insertBalance(res);
+			const Tree updatedHeight = balanced.writeHeight( 1 + max( Tree(balanced.head->left).readHeight(), Tree(balanced.head->right).readHeight()));
+
+			return updatedHeight;
+		}
+
+		return *this;
+	}
+
+	/*
+	Tree push (const Tree a) const 
+	{
+	*/
 
 
-template <typename T>
-Tree<T> rotateLeft (const Tree<T> tree)
-{
+	Tree remove (const T res) const
+	{
+		if (!contains(res))
+			return *this;
 
-	if(height(Tree<T>(tree.head->right)) == 0)
-		throw std::out_of_range("left rotating a list with empty right side");
+		return removeOperation(res);
+	}
 
-	using SharedNode = std::shared_ptr<TreeNode<T>>;
 
-	const SharedNode Head = tree.head;
-	const SharedNode A = Head->right;
-	const SharedNode B = (A == nullptr ? nullptr : A->left);
-	const SharedNode C = Head->left;
 
-	const SharedNode newLeft = std::make_shared<TreeNode<T>>(Head->res, C, B);
 
-	const Tree<T> rotated = Tree<T>( A->res, writeHeight<T>( newLeft, max(readHeight<T>(newLeft->left), readHeight<T>(newLeft->right)) +1).head,  A->right);
-	
-	return writeHeight<T>(rotated, max( readHeight<T>(rotated.head->left), readHeight<T>(rotated.head->right)) +1);
 
-};
+	bool contains (const T res) const
+	{
+		if(head == nullptr)
+			return false;
 
-template <typename T>
-Tree<T> rotateRight (const Tree<T> tree)
-{
+		if(res < head->res)
+			return Tree(head->left).contains(res);
 
-	assert(height(Tree<T>(tree.head->left)) == readHeight<T>(tree.head->left));
-	if(height(Tree<T>(tree.head->left)) == 0)
-		throw std::out_of_range("right rotating a list with empty left side");
+		if(res > head->res)
+			return Tree(head->right).contains(res);
 
-	using SharedNode = std::shared_ptr<TreeNode<T>>;
-
-	const SharedNode Head = tree.head;
-
-	const SharedNode A = Head->left;
-	const SharedNode B = (A == nullptr ? nullptr : A->right);
-	const SharedNode C = Head->right;
-
-	const SharedNode newRight = std::make_shared<TreeNode<T>>(Head->res, B, C);
-	const Tree<T> rotated = Tree<T>( A->res, A->left, writeHeight<T>( newRight, max( readHeight<T>(newRight->left), readHeight<T>(newRight->right)) + 1).head);
-
-	return writeHeight<T>(rotated, max( readHeight<T>(rotated.head->left), readHeight<T>(rotated.head->right)) +1);
-
+		return true;
+	};
 
 };
 
-template <typename T>
-Tree<T> doubleRotateRight (const Tree<T> tree)
+/*
+//should these be implicit conversions?
+//also these are all unbalancing if the list gets sorted
+template <typename T, typename F = T(T)>
+Tree<T> map (const Tree<T> tree, F fun)
 {
-
-	return rotateRight<T>( Tree<T>(tree.head->res, rotateLeft<T>(tree.head->left).head , tree.head->right));
-};
-
-template <typename T>
-Tree<T> doubleRotateLeft (const Tree<T> tree)
-{
-
-
-	return rotateLeft<T> ( Tree<T>(tree.head->res, tree.head->left, rotateRight<T>(tree.head->right).head));
+	return ListToTree(map(TreeToList(tree), fun));
 }
 
-
-
-template <typename T>
-Tree<T> insertBalance (const Tree<T> tree, const T key)
+template <typename T, typename F = T(T,T)>
+T fold (const Tree<T> tree, F fun, T init)
 {
-
-	if (balanced(tree) > 1 && key < tree.head->left->res)
-		return rotateRight(tree);
-
-	if (balanced(tree) < -1 && key > tree.head->right->res)
-		return rotateLeft(tree);
-
-	if (balanced(tree) > 1)
-		return doubleRotateRight(tree);
-
-	if (balanced(tree) < -1)
-		return doubleRotateLeft(tree);
-
-	return tree;
+	return ListToTree( fold( TreeToList(tree), fun, init));
 }
-
-template<typename T>
-Tree<T> removeBalance (const Tree<T> tree, const T key)
-{
-	if(tree.head == nullptr)
-	{
-		return tree; 
-	}
-
-	if (balanced<T>(tree) > 1 && balanced<T>(tree.head->left) >= 0)
-		return rotateRight(tree);
-
-	if(balanced<T>(tree) > 1 && balanced<T>(tree.head->left) < 0)
-		return doubleRotateRight(tree);
-
-	if(balanced<T>(tree) < -1 && balanced<T>(tree.head->right) <= 0)
-		return rotateLeft(tree);
-
-	if(balanced<T>(tree) < -1 && balanced<T>(tree.head->right) > 0)
-		return doubleRotateLeft(tree);
-
-
-	return tree;
-}
-
-
-template <typename T>
-Tree<T> push (const Tree<T> tree, const T res)
-{
-	if(tree.head == nullptr)
-		return Tree<T>(res);
-
-	T y = tree.head->res; 
-
-	if(res < tree.head->res)
-	{
-		const Tree<T> niaveInsert = Tree<T>(y, push<T>(tree.head->left, res).head, tree.head->right);
-		const Tree<T> balanced = insertBalance(niaveInsert, res);
-		const Tree<T> updatedHeight = writeHeight(balanced, 1 + max( readHeight<T>( balanced.head->left), readHeight<T>(balanced.head->right)));
-
-		return updatedHeight;
-	}
-
-	if(res > tree.head->res)
-	{
-		const Tree<T> niaveInsert = Tree<T>(y, tree.head->left, push<T>(tree.head->right, res).head);
-		const Tree<T> balanced = insertBalance(niaveInsert, res);
-		const Tree<T> updatedHeight = writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
-
-		return updatedHeight;
-	}
-
-	return tree.head;
-}
-
-template<typename T>
-Tree<T> remove (const Tree<T> tree, const T res)
-{
-	if (!contains(tree, res))
-		return tree; 
-
-	return removeOperation(tree, res);
-}
+*/
 
 
 
-template <typename T>
-Tree<T> removeOperation (const Tree<T> tree, const T res)
-{
-	if(tree.head == nullptr)
-	{
-		return tree; 
-	}
 
 
-	T y = tree.head->res; 
-
-	if(res < y)
-	{
-		const Tree<T> niaveRemove = Tree<T>(y, removeOperation<T>(tree.head->left, res).head, tree.head->right);
-		const Tree<T> balanced = removeBalance(niaveRemove, res);
-		return  writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
-
-	}
-
-	if(res > y)
-	{
-		const Tree<T> niaveRemove = Tree<T>(y, tree.head->left, removeOperation<T>(tree.head->right, res).head);
-		const Tree<T> balanced = removeBalance(niaveRemove, res);
-		return  writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
-
-	}
 
 
-	if(tree.head->left == nullptr && tree.head->right == nullptr)
-	{
-		return Tree<T>(nullptr);
-	}
-
-	if( tree.head->left == nullptr || tree.head->right == nullptr)
-	{
-
-		const Tree<T> temp = tree.head->left == nullptr ? tree.head->right : tree.head->left;
-
-		return  writeHeight(temp, 1 + max( readHeight<T>( temp.head->left), readHeight<T>(temp.head->right)));
-
-	}
-
-	//two child case 
-	else 
-	{
-
-		const Tree<T> temp = minValueNode<T>(tree.head->right);
-		const  Tree<T> remmed(temp.head->res, tree.head->left, remove<T>(tree.head->right, temp.head->res).head);
 
 
-		return  writeHeight(remmed, 1 + max( readHeight<T>( remmed.head->left), readHeight<T>(remmed.head->right)));
-	}
-
-}
-
-
-template<typename T>
-bool contains (const Tree<T> tree, const T res)
-{
-	if(tree.head == nullptr)
-		return false;
-
-	if(res < tree.head->res)
-		return contains<T>(tree.head->left, res);
-
-	if(res > tree.head->res)
-		return contains<T>(tree.head->right, res);
-
-	return true;
-};
 
 
 
