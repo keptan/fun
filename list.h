@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <initializer_list>
-
+#include <functional> 
 //singly linked list 
 //nodes are shared between list tails thanks to being persistent 
 //ref counted with shared_ptr 
@@ -149,7 +149,7 @@ public:
 	}
 
 	template <typename F = T(T)>
-	List map (const F fun)
+	List map (const F fun) const
 	{
 		if (length() == 0)
 			return List(nullptr);
@@ -159,6 +159,39 @@ public:
 
 		return fun(peek()) + pop().map(fun);
 	}
+
+	template < typename G, typename F = std::function<G(T,G)>>
+	G foldr ( F fun, G init) const
+	{
+		if (length() == 0)
+			return init;
+
+		return fun( peek(), pop().foldr(fun, init));
+
+	}
+
+	template <typename G, typename F = std::function<G(T,G)>>
+	G foldl (F fun, G init) const
+	{
+		if (length() == 0)
+			return init;
+
+		return fun( peek_back(), pop_back().foldl( fun, init));
+	}
+
+	template <typename F = std::function<bool(T)>>
+	List filter (F fun) const
+	{
+		if (length() == 0)
+			return *this;
+
+		if (fun(peek()))
+			return peek() + pop().filter(fun);
+
+		return pop().filter(fun);
+	}
+
+
 
 
 
