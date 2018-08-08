@@ -269,6 +269,7 @@ public:
 		return left + head->res + right;
 	}
 
+
 	//returns the number of elements in a tree
 	int size (void) const
 	{

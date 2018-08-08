@@ -148,6 +148,20 @@ public:
 		return b.push_back(*this);
 	}
 
+	template <typename F = T(T)>
+	List map (const F fun)
+	{
+		if (length() == 0)
+			return List(nullptr);
+
+		if (length() == 1)
+			return List( fun( peek()));
+
+		return fun(peek()) + pop().map(fun);
+	}
+
+
+
 	//need to unify how we're traversing, because we're pushing_back innificiently to append which is retarded 
 	//use map for <<
 	//maybe pop_back is needed there being slow again
