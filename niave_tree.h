@@ -1,56 +1,56 @@
 #ifndef NIAVE_TREE_H
 #define NIAVE_TREE_H 
 #include "utility.h" 
+#include <iostream>
+#include <cassert>
 #include "list.h"
 
-enum Color {Red, Black};
 //node that holds resource and points to other members
 //shared by different trees (persistent tree)
 template<typename T>
-struct RBTreeNode
+struct TreeNode
 {
-	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
-
-	Color c;
+	using SharedNode = std::shared_ptr<TreeNode<T>>;
 
 	const T res; 
 	const SharedNode left; 
 	const SharedNode right;
+	const int height;
 
-	RBTreeNode (Color c, T res , SharedNode l = nullptr 
-						 ,SharedNode  r = nullptr)
-		:c(c), res(res), left(l), right(r)
+	TreeNode (T res , SharedNode l = nullptr 
+						 ,SharedNode  r = nullptr, int h = 1)
+		:res(res), left(l), right(r), height(h)
 	{}
 };
 
 //holds a head and some constructors
 template <typename T>
-struct RBTree 
+struct Tree 
 {
-	using Node = RBTreeNode<T>;
-	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
+	using Node = TreeNode<T>;
+	using SharedNode = std::shared_ptr<TreeNode<T>>;
 	const SharedNode head; 
 
-	RBTree (const SharedNode h)
+	Tree (const SharedNode h)
 		:head(h)
 	{}
 
-	explicit RBTree (T res, Color c = Black)
-		: head(std::make_shared<Node>(c, res))
+	explicit Tree (T res)
+		: head(std::make_shared<Node>(res))
 	{}
 
-	explicit RBTree (T res, SharedNode left, SharedNode right, Color c = Black)
-		: head(std::make_shared<Node>(c, res, left, right))
+	explicit Tree (T res, SharedNode left, SharedNode right, int h = 1)
+		: head(std::make_shared<Node>(res, left, right, h))
 	{}
 
-	explicit RBTree (void)
+	explicit Tree (void)
 		: head(nullptr)
 	{}
 };
 
 //returns the number of elements in a tree
 template <typename T>
-int size (const RBTree<T> tree)
+int size (const Tree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
@@ -58,108 +58,91 @@ int size (const RBTree<T> tree)
 	return 1 + size<T>(tree.head->left) + size<T>(tree.head->right);
 }
 
+template <typename T>
+int readHeight (const Tree<T> tree)
+{
+	if (tree.head == nullptr)
+		return 0; 
+
+	return tree.head->height;
+}
+
+template <typename T>
+Tree<T> writeHeight (const Tree<T> tree, int h)
+{
+	if (tree.head == nullptr)
+		return tree; 
+
+	return Tree<T>( tree.head->res, tree.head->left, tree.head->right, h);
+}
+
+
 //returns the height of a tree
 template <typename T>
-int height (const RBTree<T> tree)
+int height (const Tree<T> tree)
+{
+	if (tree.head == nullptr)
+		return 0; 
+
+	return max(readHeight<T>(tree.head->left), readHeight<T>(tree.head->right)) + 1;
+}
+
+template <typename T>
+Tree<T> minValueNode (const Tree<T> tree)
+{
+	if (tree.head->left == nullptr)
+		return tree;
+
+	return minValueNode<T>(tree.head->left);
+}
+
+
+//returns if the tree is balanced
+template <typename T>
+int balanced (const Tree<T> tree)
 {
 	if(tree.head == nullptr)
 		return 0;
 
-	return  max(1 +  height<T>(tree.head->left),  1 + height<T>(tree.head->right));
-}
-
-template <typename T>
-int blackHeight (const RBTree<T> tree)
-{
-	if (tree.head == nullptr)
-		return 1; 
-
-	if (tree.head->c == Red)
-		return max(  blackHeight<T>(tree.head->left), blackHeight<T>(tree.head->right));
-
-	return max( 1 +  blackHeight<T>(tree.head->left), 1 + blackHeight<T>(tree.head->right));
-}
-
-template <typename T>
-bool doubleLeft (const RBTree<T> tree)
-{
-	return tree.head && tree.head->c == Red && height<T>(tree.head->left) && tree.head->left->c == Red; 
-}
-
-template <typename T>
-bool doubleRight (const RBTree<T> tree)
-{
-	return height(tree) && tree.head->c == Red && height<T>(tree.head->right) && tree.head->right->c == Red;
-}
-
-template <typename T>
-RBTree<T> paint (const RBTree<T> tree, Color c)
-{
-	if(!height(tree))
-		return tree; 
-
-	return RBTree<T>(tree.head->res, tree.head->left, tree.head->right, c);
-}
-	
-
-//returns if the tree is balanced
-template <typename T>
-bool balanced (const RBTree<T> tree)
-{
-	if(tree.head == nullptr)
-		return true;
-
+	assert(height<T>(tree.head->left) == readHeight<T>(tree.head->left));
+	assert(height<T>(tree.head->right) == readHeight<T>(tree.head->right));
 	const int left = height<T>(tree.head->left);
 	const int right = height<T>(tree.head->right);
 
-	if ( max(left, right) - min(left, right) < 2)
-		return true;
+	return left - right;
 
-	return false;
 }
-
-/*
-//returns if the tree is black balanced 
-template <typename T> 
-bool blackBalanced (const RBTree<T> tree)
-{
-	if(tree.head == nullptr)
-		return true; 
-
-	const int left = blackHeight<T>(tree.head->left);
-	const int right = blackHeight<T>(tree.head->right);
-
-	if (left == right)
-		return blackBalanced(
-
-	return false;
-*/
 
 
 template <typename T>
-RBTree<T> rotateLeft (const RBTree<T> tree)
+Tree<T> rotateLeft (const Tree<T> tree)
 {
-	if(height(RBTree<T>(tree.head->right)) == 0)
+	if(height(Tree<T>(tree.head->right)) == 0)
 		throw std::out_of_range("left rotating a list with empty right side");
 
-	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
+	using SharedNode = std::shared_ptr<TreeNode<T>>;
 
 	const SharedNode Head = tree.head;
 	const SharedNode A = Head->right;
 	const SharedNode B = (A == nullptr ? nullptr : A->left);
 	const SharedNode C = Head->left;
 
-	return  RBTree<T>( A->res, std::make_shared<RBTreeNode<T>>(Head->res, C, B), A->right);
+	const SharedNode newLeft = std::make_shared<TreeNode<T>>(Head->res, C, B);
+
+	const Tree<T> rotated = Tree<T>( A->res, writeHeight<T>( newLeft, max(readHeight<T>(newLeft->left), readHeight<T>(newLeft->right)) +1).head,  A->right);
+	
+	return writeHeight<T>(rotated, max( readHeight<T>(rotated.head->left), readHeight<T>(rotated.head->right)) +1);
 
 };
 
 template <typename T>
-RBTree<T> rotateRight (const RBTree<T> tree)
+Tree<T> rotateRight (const Tree<T> tree)
 {
-	if(height(RBTree<T>(tree.head->left)) == 0)
+	assert(height(Tree<T>(tree.head->left)) == readHeight<T>(tree.head->left));
+	if(height(Tree<T>(tree.head->left)) == 0)
 		throw std::out_of_range("right rotating a list with empty left side");
 
-	using SharedNode = std::shared_ptr<RBTreeNode<T>>;
+	using SharedNode = std::shared_ptr<TreeNode<T>>;
 
 	const SharedNode Head = tree.head;
 
@@ -167,71 +150,141 @@ RBTree<T> rotateRight (const RBTree<T> tree)
 	const SharedNode B = (A == nullptr ? nullptr : A->right);
 	const SharedNode C = Head->right;
 
-	return  RBTree<T>( A->res, A->left, std::make_shared<RBTreeNode<T>>(Head->res, B, C));
+	const SharedNode newRight = std::make_shared<TreeNode<T>>(Head->res, B, C);
+	const Tree<T> rotated = Tree<T>( A->res, A->left, writeHeight<T>( newRight, max( readHeight<T>(newRight->left), readHeight<T>(newRight->right)) + 1).head);
+
+	return writeHeight<T>(rotated, max( readHeight<T>(rotated.head->left), readHeight<T>(rotated.head->right)) +1);
+
 
 };
 
 template <typename T>
-RBTree<T> balance (Color c, T res, RBTree<T> left, RBTree<T> right)
+Tree<T> doubleRotateRight (const Tree<T> tree)
 {
-	if ( c == Black && doubleLeft(left))
-		return RBTree<T>(
-				left.head->res, paint<T>(left.head->left, Black).head, RBTree<T>(res, left.head->right, right.head, Black).head 
-				,Red);
+	std::cout << "double right rotate\n";
 
-	if (c == Black && doubleRight(left))
-		return RBTree<T>(
-				left.head->right->res
-				,RBTree<T>(left.head->res, left.head->left, left.head->right->left, Black).head
-				,RBTree<T>(res, left.head->right, right.head, Black).head 
-				,Red);
-
-	if (c == Black && doubleLeft(right))
-		return RBTree<T>(
-				right.head->left->res
-				,RBTree<T>(res, left.head, right.head->left->left, Black).head
-				,RBTree<T>(right.head->res, right.head->left->right, right.head->right, Black).head
-				,Red);
-
-	if (c == Black && doubleRight(right))
-		return RBTree<T>(
-				right.head->res
-				,RBTree<T>(res, left.head, right.head->left).head
-				,paint<T>(right.head->right, Black).head
-				,Red);
-
-	return RBTree<T>(res, left.head, right.head, c);
-}
+	return rotateRight<T>( Tree<T>(tree.head->res, rotateLeft<T>(tree.head->left).head , tree.head->right));
+};
 
 template <typename T>
-RBTree<T> invsert (const RBTree<T> tree, const T res)
+Tree<T> doubleRotateLeft (const Tree<T> tree)
+{
+
+	std::cout << "double left rotate\n";
+
+	return rotateLeft<T> ( Tree<T>(tree.head->res, tree.head->left, rotateRight<T>(tree.head->right).head));
+}
+
+
+
+template <typename T>
+Tree<T> insertBalance (const Tree<T> tree, const T key)
+{
+
+	if (balanced(tree) > 1 && key < tree.head->left->res)
+		return rotateRight(tree);
+
+	if (balanced(tree) < -1 && key > tree.head->right->res)
+		return rotateLeft(tree);
+
+	if (balanced(tree) > 1)
+		return doubleRotateRight(tree);
+
+	if (balanced(tree) < -1)
+		return doubleRotateLeft(tree);
+
+	return tree;
+}
+
+template<typename T>
+Tree<T> removeBalance (const Tree<T> tree, const T key)
 {
 	if(tree.head == nullptr)
-		return RBTree<T>(res, Red);
+		return tree; 
+
+	if (balanced<T>(tree) > 1 && balanced<T>(tree.head->left) >= 0)
+		return rotateRight(tree);
+
+	if(balanced<T>(tree) > 1 && balanced<T>(tree.head->left) < 0)
+		return doubleRotateRight(tree);
+
+	if(balanced<T>(tree) < -1 && balanced<T>(tree.head->right) <= 0)
+		return rotateLeft(tree);
+
+	if(balanced<T>(tree) < -1 && balanced<T>(tree.head->right) > 0)
+		return doubleRotateLeft(tree);
+
+	return tree;
+}
+
+
+template <typename T>
+Tree<T> push (const Tree<T> tree, const T res)
+{
+	if(tree.head == nullptr)
+		return Tree<T>(res);
 
 	T y = tree.head->res; 
-	Color c = tree.head->c;
 
 	if(res < tree.head->res)
-		return balance<T>(c, y, invsert<T>(tree.head->left, res).head, tree.head->right);
+	{
+		const Tree<T> niaveInsert = Tree<T>(y, push<T>(tree.head->left, res).head, tree.head->right);
+		const Tree<T> balanced = insertBalance(niaveInsert, res);
+		const Tree<T> updatedHeight = writeHeight(balanced, 1 + max( readHeight<T>( balanced.head->left), readHeight<T>(balanced.head->right)));
+
+		return updatedHeight;
+	}
 
 	if(res > tree.head->res)
-		return balance<T>(c, y, tree.head->left, invsert<T>(tree.head->right, res).head);
+	{
+		const Tree<T> niaveInsert = Tree<T>(y, tree.head->left, push<T>(tree.head->right, res).head);
+		const Tree<T> balanced = insertBalance(niaveInsert, res);
+		const Tree<T> updatedHeight = writeHeight(balanced, 1 + max(readHeight<T>(balanced.head->left), readHeight<T>(balanced.head->right)));
+
+		return updatedHeight;
+	}
 
 	return tree.head;
 }
 
-//use ORD? 
 template <typename T>
-RBTree<T> push (const RBTree<T> tree, const T res)
+Tree<T> remove (const Tree<T> tree, const T res)
 {
-	const RBTree<T> n = invsert(tree, res);
+	if(tree.head == nullptr)
+		return tree; 
 
-	return RBTree<T>(n.head->res, n.head->left, n.head->right, Black);
+	T y = tree.head->res; 
+
+	if(res < y)
+		return removeBalance( Tree<T>(y, remove<T>(tree.head->left, res).head, tree.head->right), res);
+
+	if(res > y)
+		return removeBalance( Tree<T>(y, tree.head->left, remove<T>(tree.head->left, res).head), res);
+
+	//one child case
+	if( tree.head->left == nullptr || tree.head->right == nullptr)
+	{
+		const Tree<T> temp = tree.head->left ? tree.head->left : tree.head->right;
+
+		return  writeHeight(temp, 1 + max( readHeight<T>( temp.head->left), readHeight<T>(temp.head->right)));
+
+	}
+
+	//two child case 
+	else 
+	{
+		const Tree<T> temp = minValueNode<T>(tree.head->right);
+		const  Tree<T> remmed  = (temp.head->res, tree.head->left, remove<T>(temp, temp.head->res).head);
+
+
+		return  writeHeight(remmed, 1 + max( readHeight<T>( remmed.head->left), readHeight<T>(remmed.head->right)));
+	}
+
 }
 
+
 template<typename T>
-bool contains (const RBTree<T> tree, const T res)
+bool contains (const Tree<T> tree, const T res)
 {
 	if(tree.head == nullptr)
 		return false;

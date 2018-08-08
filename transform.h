@@ -8,7 +8,7 @@
 
 //replace with some kind of traverse generic map -> List push?
 template<typename T>
-List<T> TreeToList (const RBTree<T> tree, const List<T> list = List<T>(nullptr))
+List<T> TreeToList (const Tree<T> tree, const List<T> list = List<T>(nullptr))
 {
 	if (tree.head == nullptr)
 		return list;
@@ -23,7 +23,7 @@ List<T> TreeToList (const RBTree<T> tree, const List<T> list = List<T>(nullptr))
 
 //AHHHHHHHHHH
 template <typename T>
-RBTree<T> ListToTree (const List<T> list, const RBTree<T> tree = RBTree<T>(nullptr))
+Tree<T> ListToTree (const List<T> list, const Tree<T> tree = Tree<T>(nullptr))
 {
 	if (length(list) == 0)
 		return tree;
@@ -76,13 +76,13 @@ G foldl (const List<T> list, F fun, G init)
 //should these be implicit conversions?
 //also these are all unbalancing if the list gets sorted
 template <typename T, typename F = T(T)>
-RBTree<T> map (const RBTree<T> tree, F fun)
+Tree<T> map (const Tree<T> tree, F fun)
 {
 	return ListToTree(map(TreeToList(tree), fun));
 }
 
 template <typename T, typename F = T(T,T)>
-T fold (const RBTree<T> tree, F fun, T init)
+T fold (const Tree<T> tree, F fun, T init)
 {
 	return ListToTree( fold( TreeToList(tree), fun, init));
 }

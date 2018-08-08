@@ -34,4 +34,12 @@ public:
 	{}
 };
 
+
+template<typename T>
+List<T> operator + (const String  a, const String b)
+{
+	return push_back(a, b);
+}
+
+
 #endif
