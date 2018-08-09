@@ -2,7 +2,7 @@
 #define TRANSFORM_H 
 
 #include "list.h" 
-#include "niave_tree.h"
+#include "tree.h"
 #include <iostream>
 #include <functional>
 
@@ -31,7 +31,6 @@ Tree<T> ListToTree (const List<T> list, const Tree<T> tree = Tree<T>(nullptr))
 
 	return ListToTree(pop(list), push(tree, peek(list)));
 }
-*/
 
 
 template <typename T, typename F = T(T)>
@@ -74,6 +73,8 @@ G foldl (const List<T> list, F fun, G init)
 
 	return fun( peek_back(list), foldl(pop_back(list), fun, init));
 }
+
+*/
 
 
 
