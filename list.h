@@ -52,7 +52,7 @@ public:
 		return *this;
 	}
 
-	bool operator == (const List& a)
+	bool operator == (const List& a) const
 	{
 		if(length() == 0 && a.length() == 0)
 			return true; 
@@ -65,6 +65,11 @@ public:
 
 
 		return pop() == a.pop();
+	}
+
+	bool operator != (const List& a) const
+	{
+		return !( *this == a);
 	}
 
 	//0 length for empty lists, 1 is just a node, 2+ has tail 
@@ -191,7 +196,7 @@ public:
 		return *this;
 	}
 
-	List find (T res)
+	List find (T res) const
 	{
 		if (length() == 0)
 			return *this;
@@ -204,7 +209,7 @@ public:
 		return  pop().find(res);
 	}
 
-	List find (const List<T> l)
+	List find (const List<T> l) const
 	{
 		if (l.length() == 0)
 			return List(nullptr); 
