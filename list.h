@@ -148,6 +148,36 @@ public:
 		return b.push_back(*this);
 	}
 
+	List reverse (void) const 
+	{
+		if(length() < 2)
+			return *this; 
+
+		return List(peek()).push( pop().reverse());
+	}
+
+
+	List split (int start , int end = length() + 1) const
+	{
+		if(start < 0 || end +1 > length())
+			throw std::out_of_range("trying to split out of range");
+
+		if(start > end)
+			throw std::out_of_range("start of split is after end");
+
+			
+		if(start > 0)
+			return pop().split( start - 1, end -1);
+
+		if(end - start < length()- 1)
+			return pop_back().split(start, end);
+
+		return *this;
+
+	}
+
+
+
 	template <typename F = T(T)>
 	List map (const F fun) const
 	{
@@ -191,7 +221,7 @@ public:
 		return pop().filter(fun);
 	}
 
-	T operator [] (int i)
+	T operator [] (int i) const
 	{
 		if (i + 1> length())
 			throw std::out_of_range("[] trying to access an out of range element");
@@ -201,9 +231,6 @@ public:
 
 		return pop()[i - 1];
 	}
-
-
-
 
 
 	//need to unify how we're traversing, because we're pushing_back innificiently to append which is retarded 
