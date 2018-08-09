@@ -4,6 +4,7 @@
 #include <memory>
 #include <initializer_list>
 #include <functional> 
+#include <iostream> 
 //singly linked list 
 //nodes are shared between list tails thanks to being persistent 
 //ref counted with shared_ptr 
@@ -50,6 +51,22 @@ public:
 		head = a.head;
 		return *this;
 	}
+
+	bool operator == (const List& a)
+	{
+		if(length() == 0 && a.length() == 0)
+			return true; 
+
+		if(length() != a.length())
+			return false; 
+
+		if (peek() != a.peek())
+			return false;
+
+
+		return pop() == a.pop();
+	}
+
 	//0 length for empty lists, 1 is just a node, 2+ has tail 
 	int length (void) const
 	{
@@ -164,7 +181,6 @@ public:
 
 		if(start > end)
 			throw std::out_of_range("start of split is after end");
-
 			
 		if(start > 0)
 			return pop().split( start - 1, end -1);
@@ -173,7 +189,36 @@ public:
 			return pop_back().split(start, end);
 
 		return *this;
+	}
 
+	List find (T res)
+	{
+		if (length() == 0)
+			return *this;
+
+		if (peek() == res)
+		{
+			return *this;
+		}
+
+		return  pop().find(res);
+	}
+
+	List find (const List<T> l)
+	{
+		if (l.length() == 0)
+			return List(nullptr); 
+
+		if (length() == 0)
+			return *this;
+
+		if (peek() == l.peek())
+		{
+			if (split(0, l.length() -1) == l)
+				return *this;
+		}
+
+		return pop().find(l);
 	}
 
 
