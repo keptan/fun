@@ -191,6 +191,17 @@ public:
 		return pop().filter(fun);
 	}
 
+	T operator [] (int i)
+	{
+		if (i + 1> length())
+			throw std::out_of_range("[] trying to access an out of range element");
+
+		if(i == 0)
+			return peek(); 
+
+		return pop()[i - 1];
+	}
+
 
 
 
