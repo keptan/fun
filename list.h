@@ -233,32 +233,6 @@ public:
 	//variadic zip method 
 	//
 	
-	List reverseMut (void) const 
-	{
-		if(length() < 2)
-			return *this; 
-
-
-		List out = *this; 
-
-		List out2 = List(nullptr); 
-
-		for(int i = 0; i < out.length() ; i++)
-		{
-			out2 = out2.push(out[i]); 
-		}
-
-		return out2;
-
-
-
-	//some kind of efficient reverse iterator needed to fix this hell 
-	//	return foldl( [](auto c, const List l){ return l.push(c)}, List(nullptr));
-
-	}
-
-
-
 	List reverse (void) const 
 	{
 		if(length() < 2)
@@ -355,7 +329,7 @@ public:
 		if (length() == 0)
 			return init;
 
-		return reverseMut().foldr( fun, init);
+		return reverse().foldr( fun, init);
 
 		//return fun( peek_back(), pop_back().foldl( fun, init));
 	}
