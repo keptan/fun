@@ -11,6 +11,8 @@
 //nodes are shared between list tails thanks to being persistent 
 //ref counted with shared_ptr 
 //ref counted child node 
+//
+//
 template<typename T> 
 struct ListNode 
 {
@@ -375,6 +377,10 @@ public:
 
 };
 
+template <typename T>
+List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
+
+
 	template<typename T>
 	List<T> operator+ (const List<T> a,  const T b)
 	{
@@ -403,23 +409,23 @@ public:
 
 		os << l.peek();
 		
-		return os << l.pop();
+		return os << ',' << l.pop();
 	}
 
 	template<typename T>
-	int largest (int i, const List<T> first)
+	std::ostream& operator<< (std::ostream& os, const List<List<T>>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 
 	{
-		return max(i, first.length());
+
+		if(!l.length())
+			return os;
+
+		os << '[' << l.peek() << ']';
+		
+		return os << l.pop();
 	}
 
 
-	template <typename T, typename... A>
-	int largest(int i ,const List<T> first, A... rest)
-	{
-		const int big = max(i, first.length());
 
-		return max( big, largest(big, rest...));
-	}
 
 	
 	template<typename T>
@@ -444,7 +450,48 @@ public:
 
 		return std::get<1>(finalTuple) + std::get<0>(finalTuple);
 	}
+
+	template<typename T>
+	List<List<T>> vSortInput (const List<List<T>> out, const List<T> first)
+	{
+		return mergeSort<List<T>>(out.push(first), [](List<T>  a, List<T>  b){ return a.length() < b.length();});
+	}
+
+
+	template <typename T, typename... A>
+	List<List<T>> vSortInput (const List<List<T>> out, const List<T> first, A... rest)
+	{
+		return vSortInput(out.push(first), rest...);
+	}
+
+	template<typename T>
+	List<List<T>> zipAdd (const List<T> input, const List<List<T>> output)
+	{
+
+		const auto tupleZip = [](const T input, const std::tuple< List<List<T>>, List<List<T>>> tuple)
+		{
+			const auto first = std::get<0>(tuple).pop(); 
+			const auto second = std::get<1>(tuple).push( std::get<0>(tuple).peek().push(input));
+
+			return std::make_tuple(first, second);
+		};
+
+		const auto finalTuple = input.foldl( tupleZip, std::make_tuple(output, List<List<T>>(nullptr)));
+		return std::get<0>(finalTuple).reverse() + std::get<1>(finalTuple);
+	}
+
 		
+	template<typename T, typename... A>
+	List<List<T>> zip (const List<T> first, A... rest)
+	{
+	
+		const auto sortedInput = vSortInput( List<List<T>>(nullptr), first, rest...);
+
+		const auto initTupleList = sortedInput.peek().foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>(nullptr));
+
+		return  sortedInput.pop().foldr(zipAdd<T>, initTupleList).reverse();
+	}
 
 
 #endif
+

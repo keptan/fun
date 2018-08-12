@@ -43,5 +43,18 @@ List<T> operator + (const String  a, const String b)
 	return a.push_back(b);
 }
 
+template<typename T>
+std::ostream& operator<< (std::ostream& os, const String& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 
+{
+	if(!l.length())
+		return os;
+
+	os << l.peek();
+	
+	return os <<  l.pop();
+}
+
+
+
 
 #endif

@@ -16,7 +16,7 @@ bool sorted (const List<T> l, const F compare = ordOverload)
 	if( !compare( l.pop().peek(), l.peek()))
 		return false; 
 
-	return sorted(l.pop());
+	return sorted(l.pop(), compare);
 }
 
 template <typename T> 
@@ -42,11 +42,11 @@ List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOve
 	const List<T> larger =  max(a,b,c);
 	const List<T> smaller = min(a,b,c);
 
-	return smaller.peek() + mergeOrdered( smaller.pop(), larger);
+	return smaller.peek() + mergeOrdered( smaller.pop(), larger, compare);
 }
 
 template <typename T>
-List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload)
+List<T> mergeSort (const List<T> l, const Ord<T> compare)
 {
 	if(sorted(l, compare))
 		return l; 
