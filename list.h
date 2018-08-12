@@ -5,6 +5,8 @@
 #include <initializer_list>
 #include <functional> 
 #include <iostream> 
+#include <tuple> 
+#include "utility.h" 
 //singly linked list 
 //nodes are shared between list tails thanks to being persistent 
 //ref counted with shared_ptr 
@@ -27,7 +29,52 @@ struct List
 {
 	std::shared_ptr<ListNode<T>> head; 
 
+	List reverseBuilder (const List l = List(nullptr)) const 
+	{
+		if(length() == 0)
+				return l; 
+
+		if(length() == 1)
+			return l.push(peek());
+
+		const List out = l.push(peek()); 
+
+		return pop().reverseBuilder(out);
+	}
+
+	struct Iterator 
+	{
+		const List data;
+		const List pos;
+
+		Iterator (const List l)
+			: data(l)	
+		{}
+
+		T operator* (void) const
+		{
+			return data.peek();
+		}
+
+		Iterator operator ++ (int) const
+		{
+			return Iterator(data.pop());
+		}
+
+		bool operator == (Iterator a) const
+		{
+			return data == a.data;
+		}
+
+		explicit operator bool (void) const
+		{
+			return data.length();
+		}
+	};
+
+
 public:
+
 
 	List(T r, std::shared_ptr<ListNode<T>> h = nullptr)
 		: head(std::make_shared<ListNode<T>>(r,h))
@@ -50,6 +97,16 @@ public:
 	{
 		head = a.head;
 		return *this;
+	}
+
+	Iterator begin (void)
+	{
+		return Iterator(*this);
+	}
+
+	Iterator rbegin (void)
+	{
+		return Iterator(reverse());
 	}
 
 	bool operator == (const List& a) const
@@ -170,14 +227,53 @@ public:
 		return b.push_back(*this);
 	}
 
+	//variadic zip method 
+	//
+	
+	List reverseMut (void) const 
+	{
+		if(length() < 2)
+			return *this; 
+
+
+		List out = *this; 
+
+		List out2 = List(nullptr); 
+
+		for(int i = 0; i < out.length() ; i++)
+		{
+			out2 = out2.push(out[i]); 
+		}
+
+		return out2;
+
+
+
+	//some kind of efficient reverse iterator needed to fix this hell 
+	//	return foldl( [](auto c, const List l){ return l.push(c)}, List(nullptr));
+
+	}
+
+
+
 	List reverse (void) const 
 	{
 		if(length() < 2)
 			return *this; 
 
-		return List(peek()).push( pop().reverse());
+		return reverseBuilder();
 	}
 
+	List splitBuilder (const List in , const int end, const List out = List(nullptr)) const 
+	{
+		if(end == 0)
+			return out.push(in.peek()); 
+
+
+		return splitBuilder( in.pop(), end - 1, out.push(in.peek()));
+	}
+		
+		
 
 	List split (int start , int end = length() + 1) const
 	{
@@ -191,7 +287,7 @@ public:
 			return pop().split( start - 1, end -1);
 
 		if(end - start < length()- 1)
-			return pop_back().split(start, end);
+			return splitBuilder(*this, end).reverse();
 
 		return *this;
 	}
@@ -256,7 +352,9 @@ public:
 		if (length() == 0)
 			return init;
 
-		return fun( peek_back(), pop_back().foldl( fun, init));
+		return reverseMut().foldr( fun, init);
+
+		//return fun( peek_back(), pop_back().foldl( fun, init));
 	}
 
 	template <typename F = std::function<bool(T)>>
@@ -297,6 +395,7 @@ public:
 	}
 	*/
 
+
 };
 
 	template<typename T>
@@ -330,6 +429,51 @@ public:
 		return os << l.pop();
 	}
 
+	template<typename T>
+	int largest (int i, const List<T> first)
+	{
+		return max(i, first.length());
+	}
+
+
+	template <typename T, typename... A>
+	int largest(int i ,const List<T> first, A... rest)
+	{
+		const int big = max(i, first.length());
+
+		return max( big, largest(big, rest...));
+	}
+
+	
+	template<typename T>
+	List< List<T>> zip (const List<T> a, const List<T> b)
+	{
+		//tuple to solve the list of lists autism at work here would be nice 
+
+		const List< List<T>> out = a.foldr( [](const T in, const List< List<T>> out){ return out.push( List<T>(in));}, List< List<T>>(nullptr));
+
+		const auto doubleZip = [](const T input, const std::tuple< List<List<T>>, List<List<T>>> tuple)
+		{
+			const auto first = std::get<0>(tuple).pop(); 
+			const auto second = std::get<1>(tuple).push( std::get<0>(tuple).peek().push(input));
+
+
+			return std::make_tuple(first, second);
+		};
+
+
+		const auto out2 = b.foldr( doubleZip, std::make_tuple( out, List<List<T>>(nullptr)));
+		const auto out3 = std::get<1>(out2) + std::get<0>(out2);
+
+
+
+		out.foldl( [](const  List<T> in, int){ std::cout << in << ','; return 0;}, 0);
+		std::cout << '\n';
+		out3.foldl( [](const  List<T> in, int){ std::cout << in << ','; return 0;}, 0);
+
+		return out3; 
+	}
+		
 
 
 #endif
