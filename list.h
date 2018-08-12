@@ -196,8 +196,9 @@ public:
 		return List();
 	};
 
+
 	//a->b->c , d->e->f ... na->nb->nc->d->e->f 
-	List push_back (const List<T> b) const //combines two lists together
+	List push (const List b) const //combines two lists together
 	{
 		if(!length())
 			return b; 
@@ -207,7 +208,9 @@ public:
 		if(length() < 2)
 			return b.push(peek());
 
-		return pop_back().push_back(b.push( peek_back()));
+		return b.foldr( [](const auto a, const auto list){ return a + list;}, *this);
+
+		//return pop_back().push_back(b.push( peek_back()));
 	}
 
 	List push_back (const T res) const //puts an element at the back of a list
@@ -222,9 +225,9 @@ public:
 	}
 
 	//a->b->c, d->e->f ... n(d->e->f->a->b->c)
-	List push (const List<T> b) const//combines two lists together, but B is infront of A
+	List push_back (const List<T> b) const//combines two lists together, but B is infront of A
 	{
-		return b.push_back(*this);
+		return b.push(*this);
 	}
 
 	//variadic zip method 
@@ -446,11 +449,8 @@ public:
 
 	
 	template<typename T>
-	List< List<T>> zip (const List<T> a, const List<T> b)
+	List< List<T>> zip2 (const List<T> a, const List<T> b)
 	{
-		//tuple to solve the list of lists autism at work here would be nice 
-
-		const List< List<T>> out = a.foldr( [](const T in, const List< List<T>> out){ return out.push( List<T>(in));}, List< List<T>>(nullptr));
 
 		const auto doubleZip = [](const T input, const std::tuple< List<List<T>>, List<List<T>>> tuple)
 		{
@@ -461,17 +461,14 @@ public:
 			return std::make_tuple(first, second);
 		};
 
+		//const List< List<T>> out = a.foldr( [](const T in, const List< List<T>> out){ return out.push( List<T>(in));}, List< List<T>>(nullptr));
+		const auto larger = a.length() > b.length() ? a : b;
+		const auto smaller = a.length() > b.length() ? b : a;
 
-		const auto out2 = b.foldr( doubleZip, std::make_tuple( out, List<List<T>>(nullptr)));
-		const auto out3 = std::get<1>(out2) + std::get<0>(out2);
+		const auto initTupleList = larger.foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>(nullptr));
+		const auto finalTuple = smaller.foldl( doubleZip, std::make_tuple(initTupleList, List<List<T>>(nullptr)));
 
-
-
-		out.foldl( [](const  List<T> in, int){ std::cout << in << ','; return 0;}, 0);
-		std::cout << '\n';
-		out3.foldl( [](const  List<T> in, int){ std::cout << in << ','; return 0;}, 0);
-
-		return out3; 
+		return std::get<1>(finalTuple) + std::get<0>(finalTuple);
 	}
 		
 
