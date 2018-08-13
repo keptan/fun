@@ -454,14 +454,14 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 	template<typename T>
 	List<List<T>> vSortInput (const List<List<T>> out, const List<T> first)
 	{
-		return mergeSort<List<T>>(out.push(first), [](List<T>  a, List<T>  b){ return a.length() < b.length();});
+		return mergeSort<List<T>>(out.push_back(first), [](List<T>  a, List<T>  b){ return a.length() < b.length();});
 	}
 
 
 	template <typename T, typename... A>
 	List<List<T>> vSortInput (const List<List<T>> out, const List<T> first, A... rest)
 	{
-		return vSortInput(out.push(first), rest...);
+		return vSortInput(out.push_back(first), rest...);
 	}
 
 	template<typename T>
@@ -477,19 +477,20 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 		};
 
 		const auto finalTuple = input.foldl( tupleZip, std::make_tuple(output, List<List<T>>(nullptr)));
-		return std::get<0>(finalTuple).reverse() + std::get<1>(finalTuple);
+		return (std::get<0>(finalTuple).reverse() + std::get<1>(finalTuple)).reverse();
+		//return (std::get<1>(finalTuple)) + std::get<0>(finalTuple)).reverse();
 	}
 
 		
 	template<typename T, typename... A>
-	List<List<T>> zip (const List<T> first, A... rest)
+	List<List<T>> superZip (const List<T> first, A... rest)
 	{
 	
 		const auto sortedInput = vSortInput( List<List<T>>(nullptr), first, rest...);
 
 		const auto initTupleList = sortedInput.peek().foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>(nullptr));
 
-		return  sortedInput.pop().foldr(zipAdd<T>, initTupleList).reverse();
+		return  sortedInput.pop().foldr(zipAdd<T>, initTupleList);
 	}
 
 
