@@ -37,17 +37,67 @@ struct Take
 	{}
 
 };
+
+template<typename F>
+struct Map 
+{
+	using FunctionType = F;
+	const F fun;
+
+	Map (F f)
+		: fun(f)
+	{}
+};
+	
 struct CollectList{}; 
+
+template<typename Value, typename Stream, typename F>
+class MapInstance
+{
+	Stream stream; 
+	F fun;
+
+	public:
+	using ValueType = Value; 
+	using FunctionType = F; 
+	using StreamType = Stream;
+
+	MapInstance( Stream s, Map<F> f)
+		: stream(s), fun(f.fun)
+	{}
+
+	Value get (void) const 
+	{
+		return fun( stream.get());
+	}
+
+	bool end (void) const 
+	{
+		return stream.end(); 
+	}
+
+	MapInstance next (void) const 
+	{
+		return MapInstance( stream.next(), fun);
+	}
+
+};
+
+template<typename Stream, typename F>
+MapInstance<typename Stream::ValueType, Stream, F> operator | (Stream left, const Map<F>& right)
+{
+	return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
+}
 
 
 template<typename T, typename S>
-struct TakeInstance
+class TakeInstance
 {
 	size_t quant;
 	S stream; 
+
+	public:
 	using ValueType = T;
-
-
 	T get (void) const
 	{
 	   	return stream.get();
@@ -58,19 +108,15 @@ struct TakeInstance
 	   	return stream.end() || !quant;
 	}
 
-	TakeInstance next (void) 
+	TakeInstance next (void) const
 	{
-		quant--;
-	   	stream = stream.next();
-		return *this;
+		return TakeInstance ( stream.next(), Take(quant - 1));
 	}
 
 	TakeInstance (S s, Take t)
 		: quant(t.quant), stream(s)
 	{}
 };
-
-
 
 template<typename S>
 TakeInstance<typename S::ValueType, S> operator | (S left, const Take& right)
@@ -79,28 +125,30 @@ TakeInstance<typename S::ValueType, S> operator | (S left, const Take& right)
 }
 
 template<typename T, typename S>
-struct CollectListInstance
+class CollectListInstance
 {
 	List<T> res; 
-	S stream; 
 
-	operator List<T> (void) 
+	List<T> streamBuild (List<T> l , S s)
+	{
+		if(s.end())
+			return l;
+
+		return  streamBuild(l.push(s.get()), s.next());
+	}
+
+	public:
+
+	operator List<T> (void) const
 	{
 		return res.reverse();
 	}
 
 	CollectListInstance (S s)
-		: res(nullptr), stream(s)
+		: res( streamBuild(List<T>(nullptr), s))
 	{
-		while(!stream.end())
-		{
-			res = res.push(stream.get());
-			stream = stream.next();
-		}
-	
 	}
 };
-
 
 template<typename S>
 CollectListInstance<typename S::ValueType, S> operator | (S left, const CollectList& right)

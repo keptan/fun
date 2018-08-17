@@ -425,9 +425,6 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 		return os << l.pop();
 	}
 
-
-
-
 	
 	template<typename T>
 	List< List<T>> zip2 (const List<T> a, const List<T> b)
