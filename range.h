@@ -120,9 +120,10 @@ class MapInstance
 };
 
 template<typename Stream, typename F>
-MapInstance<typename Stream::ValueType, Stream, F> operator | (Stream left, const Map<F>& right)
+auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left)), Stream, F>
 {
-	return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
+	return MapInstance<decltype( right.fun(left)), Stream, F>(left, right);
+	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
 }
 
 
