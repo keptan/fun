@@ -48,6 +48,7 @@ List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOve
 template <typename T>
 List<T> mergeSort (const List<T> l, const Ord<T> compare)
 {
+	//should just remove this because its O(n) and wastes time 
 	if(sorted(l, compare))
 		return l; 
 
