@@ -1,5 +1,6 @@
 #include "list.h" 
 #include <optional>
+#include <limits>
 
 template <typename T>
 class ListStream 
@@ -27,6 +28,41 @@ class ListStream
 		:res(l)
 	{}
 };
+
+class Integers 
+{
+	const int i, last; 
+
+	public:
+	using ValueType = int; 
+
+	Integers (std::optional<int> start = std::nullopt, std::optional<int> e = std::nullopt) 
+		: i(start.value_or(0))
+		, last ( e.value_or( std::numeric_limits<int>::max()))
+	{
+	}
+
+	int get (void) const 
+	{
+		return i;
+	}
+
+	bool end (void) const 
+	{
+		return i == last;
+	}
+
+	Integers next (void) const 
+	{
+		if(i > last)
+			return Integers( i - 1, last);
+
+		return Integers( i + 1, last);
+	}
+};
+
+
+
 
 struct Take 
 {
