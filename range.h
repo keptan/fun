@@ -120,9 +120,9 @@ class MapInstance
 };
 
 template<typename Stream, typename F>
-auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left)), Stream, F>
+auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
 {
-	return MapInstance<decltype( right.fun(left)), Stream, F>(left, right);
+	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
 	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
 }
 
@@ -182,7 +182,7 @@ class CollectListInstance
 	}
 
 	CollectListInstance (S s)
-		: res( streamBuild(List<T>(nullptr), s))
+		: res( streamBuild(List<T>(typename List<T>::SharedNode(nullptr)), s))
 	{
 	}
 };

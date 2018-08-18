@@ -32,7 +32,7 @@ struct List
 	using DataType = T;
 	std::shared_ptr<ListNode<T>> head; 
 
-	List reverseBuilder (const List l = List(nullptr)) const 
+	List reverseBuilder (const List l = List( List::SharedNode(nullptr))) const 
 	{
 		if(length() == 0)
 				return l; 
@@ -78,8 +78,10 @@ struct List
 
 public:
 
+	using SharedNode = std::shared_ptr<ListNode<T>>;
 
-	List(T r, std::shared_ptr<ListNode<T>> h = nullptr)
+
+	explicit List(T r, std::shared_ptr<ListNode<T>> h = nullptr)
 		: head(std::make_shared<ListNode<T>>(r,h))
 	{}
 
@@ -411,6 +413,16 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 		os << l.peek();
 		
 		return os << ',' << l.pop();
+	}
+
+	std::ostream& operator<< (std::ostream& os, const List<char>& l) //ostreams the elements, maybe move this OUT of the lib because OS isn't const 
+	{
+		if(!l.length())
+			return os;
+
+		os << l.peek();
+		
+		return os << l.pop();
 	}
 
 	template<typename T>
