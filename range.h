@@ -176,6 +176,11 @@ class CollectListInstance
 
 	public:
 
+	List<T> list (void) const 
+	{
+		return res.reverse();
+	}
+
 	operator List<T> (void) const
 	{
 		return res.reverse();
@@ -192,6 +197,60 @@ CollectListInstance<typename S::ValueType, S> operator | (S left, const CollectL
 {
 	return CollectListInstance<typename S::ValueType, S>(left);
 }
+
+template <typename Stream>
+struct Fold 
+{
+	using StreamType = Stream;
+	const Stream stream; 
+
+	Fold (Stream s)
+		: stream(s)
+	{}
+};
+
+template <typename InputStream, typename ParamStream, 
+		 typename Value = std::tuple< typename InputStream::ValueType, typename ParamStream::ValueType>>
+class FoldInstance
+{
+	InputStream istream; 
+	ParamStream pstream;
+
+	public:
+	using ValueType = Value; 
+	using StreamType = InputStream;
+
+	FoldInstance (InputStream is, ParamStream ps)
+		: istream(is), pstream(ps)
+	{}
+
+	Value get (void) const 
+	{
+		return std::make_tuple( istream.get(), pstream.get());
+	}
+
+	bool end (void)
+	{
+		return istream.end() || pstream.end();
+	}
+
+	FoldInstance next (void) const
+	{
+		return FoldInstance( istream.next(), pstream.next());
+	}
+};
+
+template <typename InputStream, typename ParamStream>
+auto operator | ( InputStream left, const Fold<ParamStream>& right) 
+	-> FoldInstance< InputStream, typename Fold<ParamStream>::StreamType>
+{
+	return FoldInstance<InputStream, typename Fold<ParamStream>::StreamType>( left, right.stream);
+}
+
+
+
+
+
 
 
 
