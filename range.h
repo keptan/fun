@@ -61,9 +61,6 @@ class Integers
 	}
 };
 
-
-
-
 struct Take 
 {
 	const size_t quant; 
@@ -176,7 +173,7 @@ class CollectListInstance
 
 	public:
 
-	List<T> list (void) const 
+	List<T> get (void) const 
 	{
 		return res.reverse();
 	}
@@ -199,19 +196,19 @@ CollectListInstance<typename S::ValueType, S> operator | (S left, const CollectL
 }
 
 template <typename Stream>
-struct Fold 
+struct Zip 
 {
 	using StreamType = Stream;
 	const Stream stream; 
 
-	Fold (Stream s)
+	Zip (Stream s)
 		: stream(s)
 	{}
 };
 
 template <typename InputStream, typename ParamStream, 
 		 typename Value = std::tuple< typename InputStream::ValueType, typename ParamStream::ValueType>>
-class FoldInstance
+class ZipInstance
 {
 	InputStream istream; 
 	ParamStream pstream;
@@ -220,7 +217,7 @@ class FoldInstance
 	using ValueType = Value; 
 	using StreamType = InputStream;
 
-	FoldInstance (InputStream is, ParamStream ps)
+	ZipInstance (InputStream is, ParamStream ps)
 		: istream(is), pstream(ps)
 	{}
 
@@ -234,25 +231,60 @@ class FoldInstance
 		return istream.end() || pstream.end();
 	}
 
-	FoldInstance next (void) const
+	ZipInstance next (void) const
 	{
-		return FoldInstance( istream.next(), pstream.next());
+		return ZipInstance( istream.next(), pstream.next());
 	}
 };
 
 template <typename InputStream, typename ParamStream>
-auto operator | ( InputStream left, const Fold<ParamStream>& right) 
-	-> FoldInstance< InputStream, typename Fold<ParamStream>::StreamType>
+auto operator | ( InputStream left, const Zip<ParamStream>& right) 
+	-> ZipInstance< InputStream, typename Zip<ParamStream>::StreamType>
 {
-	return FoldInstance<InputStream, typename Fold<ParamStream>::StreamType>( left, right.stream);
+	return ZipInstance<InputStream, typename Zip<ParamStream>::StreamType>( left, right.stream);
 }
 
+template <typename F>
+struct Filter
+{
+	using FunctionType = F;
+	const F fun; 
+
+	Filter (F f)
+		: fun(f)
+	{}
+};
+
+/*
+template <typename Value, typename Stream, typename F>
+class FilterInstance 
+{
+	Stream stream; 
+	F fun; 
+
+	public: 
+	using ValueType = Value; 
+	using FunctionType = F; 
+	using StreamType = Stream; 
+
+	FilterInstance ( Stream s, Filter<F> f)
+		: stream(s), fun(f.fun)
+	{}
+
+	bool inputOver (void)
+	{
+
+
+	bool end (void) const 
+	{
+		return stream.end(); 
+
+	Value get (void) const 
+	{
+	*/
+
+		
 
 
 
 
-
-
-
-
-	

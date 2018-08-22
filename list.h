@@ -328,6 +328,20 @@ public:
 
 	}
 
+	template <typename F = std::function<void(T)>>
+	void foldr (F fun) const 
+	{
+		if (length() == 0)
+			return; 
+
+		fun(peek());
+
+		return pop().foldr(fun);
+	}
+
+
+
+
 	template <typename G, typename F = std::function<G(T,G)>>
 	G foldl (F fun, G init) const
 	{
