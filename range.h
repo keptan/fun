@@ -1,6 +1,8 @@
 #include "list.h" 
 #include <optional>
 #include <limits>
+#include <time.h> 
+#include <random>
 
 template <typename T>
 class ListStream 
@@ -60,6 +62,41 @@ class Integers
 		return Integers( i + 1, last);
 	}
 };
+
+class UniformDist 
+{
+	const int lowest, highest; 
+
+	public: 
+	using ValueType = int; 
+
+	UniformDist (int l, int h)
+		: lowest(l), highest(h)
+	{}
+
+	int get (void) const
+	{
+		//cant get around the non const api here, it's either hide the mutation here or somewhere else 
+		//cant think of a way rn to wrap this const 
+		//cant just return it as an expression because of binding temporaries to references 
+		 
+		std::random_device r;
+
+		std::mt19937 g ( r());
+		return std::uniform_int_distribution<int>(lowest, highest)(g);
+	}
+
+	bool end (void) const 
+	{
+		return false; 
+	}
+
+	UniformDist next (void) const 
+	{
+		return *this;
+	}
+};
+
 
 struct Take 
 {
@@ -226,7 +263,7 @@ class ZipInstance
 		return std::make_tuple( istream.get(), pstream.get());
 	}
 
-	bool end (void)
+	bool end (void) const
 	{
 		return istream.end() || pstream.end();
 	}
