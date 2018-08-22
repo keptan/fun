@@ -3,6 +3,7 @@
 #include <limits>
 #include <time.h> 
 #include <random>
+#include <iterator>
 
 template <typename T>
 class ListStream 
@@ -30,6 +31,45 @@ class ListStream
 		:res(l)
 	{}
 };
+
+
+
+template <typename IT, typename T = typename std::iterator_traits<IT>::value_type>
+class IteratorStream 
+{
+	const IT begin, end_;
+
+	public:
+	using ValueType = T; 
+
+	T get (void) const 
+	{
+		return *begin; 
+	}
+
+	bool end (void) const 
+	{
+		return begin == end_; 
+	}
+
+	IteratorStream next (void) const 
+	{
+		return IteratorStream( begin + 1, end_);
+	}
+
+	IteratorStream (IT b, IT e)
+		:begin(b), end_(e)
+	{}
+
+};
+
+
+
+
+
+
+
+
 
 class Integers 
 {
@@ -96,7 +136,6 @@ class UniformDist
 		return *this;
 	}
 };
-
 
 struct Take 
 {
