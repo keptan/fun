@@ -13,8 +13,8 @@ struct Take
 template<typename T, typename S>
 class TakeInstance
 {
-	size_t quant;
-	S stream; 
+	const size_t quant;
+	const S stream; 
 
 	public:
 	using ValueType = T;
@@ -33,7 +33,7 @@ class TakeInstance
 		return TakeInstance ( stream.next(), Take(quant - 1));
 	}
 
-	TakeInstance (S s, Take t)
+	TakeInstance (const S s, const Take t)
 		: quant(t.quant), stream(s)
 	{}
 };
@@ -50,7 +50,7 @@ struct Map
 	using FunctionType = F;
 	const F fun;
 
-	Map (F f)
+	Map (const F f)
 		: fun(f)
 	{}
 };
@@ -58,15 +58,15 @@ struct Map
 template<typename Value, typename Stream, typename F>
 class MapInstance
 {
-	Stream stream; 
-	F fun;
+	const Stream stream; 
+	const F fun;
 
 	public:
 	using ValueType = Value; 
 	using FunctionType = F; 
 	using StreamType = Stream;
 
-	MapInstance( Stream s, Map<F> f)
+	MapInstance( const Stream s, const Map<F> f)
 		: stream(s), fun(f.fun)
 	{}
 
@@ -100,7 +100,7 @@ struct Zip
 	using StreamType = Stream;
 	const Stream stream; 
 
-	Zip (Stream s)
+	Zip (const Stream s)
 		: stream(s)
 	{}
 };
@@ -109,14 +109,14 @@ template <typename InputStream, typename ParamStream,
 		 typename Value = std::tuple< typename InputStream::ValueType, typename ParamStream::ValueType>>
 class ZipInstance
 {
-	InputStream istream; 
-	ParamStream pstream;
+	const InputStream istream; 
+	const ParamStream pstream;
 
 	public:
 	using ValueType = Value; 
 	using StreamType = InputStream;
 
-	ZipInstance (InputStream is, ParamStream ps)
+	ZipInstance (const InputStream is, const ParamStream ps)
 		: istream(is), pstream(ps)
 	{}
 
@@ -149,7 +149,7 @@ struct ZipApply
 	using StreamType = Stream;
 	const Stream stream; 
 
-	ZipApply (Stream s)
+	ZipApply (const Stream s)
 		: stream(s)
 	{}
 };
@@ -158,20 +158,15 @@ template <typename InputStream, typename ParamStream
 	, typename Value>
 class ZipApplyInstance
 {
-	InputStream istream; 
-	ParamStream pstream;
-	InputStream start; 
+	const InputStream istream; 
+	const ParamStream pstream;
 
 	public:
 	using ValueType = Value; 
 	using StreamType = InputStream;
 
-	ZipApplyInstance (InputStream is, ParamStream ps)
-		: istream(is), pstream(ps), start(is)
-	{}
-
-	ZipApplyInstance (InputStream is, ParamStream ps, InputStream s)
-		: istream(is), pstream(ps), start(s)
+	ZipApplyInstance (const InputStream is, const ParamStream ps)
+		: istream(is), pstream(ps)
 	{}
 
 	Value get (void) const 
@@ -181,26 +176,83 @@ class ZipApplyInstance
 
 	bool end (void) const
 	{
-		return pstream.end();
+		return pstream.end() || istream.end();
 	}
 
 	ZipApplyInstance next (void) const
 	{
-		if(istream.end())
-			return  ZipApplyInstance( start, pstream.next(), start);
-
-		return ZipApplyInstance( istream.next(), pstream, start);
+		return ZipApplyInstance(istream.next(), pstream.next());
 	}
 };
 
 template <typename InputStream, typename ParamStream>
-auto operator | (InputStream left, const ZipApply<ParamStream>& right)
+auto operator | (const InputStream left, const ZipApply<ParamStream>& right)
 	-> ZipApplyInstance< InputStream, typename ZipApply<ParamStream>::StreamType, 
 		decltype( right.stream.get()(left.get()))>
 {
 	return ZipApplyInstance< InputStream, typename ZipApply<ParamStream>::StreamType, 
 		decltype( right.stream.get()(left.get()))>(left, right.stream);
 }
+
+
+template <typename Stream>
+struct Product 
+{
+	using StreamType = Stream;
+	const Stream stream; 
+
+	Product (const Stream s)
+		: stream(s)
+	{}
+};
+
+template <typename InputStream, typename ParamStream 
+	, typename Value = std::tuple< typename InputStream::ValueType, typename ParamStream::ValueType>>
+class ProductInstance 
+{
+	const InputStream istream; 
+	const ParamStream pstream;
+	const InputStream start; 
+
+	public:
+	using ValueType = Value; 
+	using StreamType = InputStream;
+
+	ProductInstance (const InputStream is, const ParamStream ps)
+		: istream(is), pstream(ps), start(is)
+	{}
+
+	ProductInstance (const InputStream is, const ParamStream ps, const InputStream s)
+		: istream(is), pstream(ps), start(s)
+	{}
+
+	Value get (void) const 
+	{
+		return std::make_tuple( istream.get(), pstream.get());
+	}
+
+	bool end (void) const 
+	{
+		return pstream.end();
+	}
+
+	ProductInstance next (void) const 
+	{
+		if(istream.end())
+			return  ProductInstance( start, pstream.next(), start);
+
+		return ProductInstance( istream.next(), pstream, start);
+	}
+};
+
+template <typename InputStream, typename ParamStream>
+auto operator | (const InputStream left, const Product<ParamStream>& right)
+	-> ProductInstance< InputStream, typename Product<ParamStream>::StreamType>
+{
+	return ProductInstance(left, right.stream);
+}
+
+
 
 
 

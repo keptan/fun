@@ -8,7 +8,7 @@
 template <typename T>
 class ListStream 
 {
-	List<T> res; 
+	const List<T> res; 
 
 	public:
 	using ValueType = T;
@@ -55,7 +55,7 @@ class IteratorStream
 		return IteratorStream( begin + 1, end_);
 	}
 
-	IteratorStream (IT b, IT e)
+	IteratorStream (const IT b, const IT e)
 		:begin(b), end_(e)
 	{}
 

@@ -6,9 +6,9 @@ struct CollectList{};
 template<typename T, typename S>
 class CollectListInstance
 {
-	List<T> res; 
+	const List<T> res; 
 
-	List<T> streamBuild (List<T> l , S s)
+	List<T> streamBuild (const List<T> l , const S s)
 	{
 		if(s.end())
 			return l;
@@ -28,7 +28,7 @@ class CollectListInstance
 		return res.reverse();
 	}
 
-	CollectListInstance (S s)
+	CollectListInstance (const S s)
 		: res( streamBuild(List<T>(typename List<T>::SharedNode(nullptr)), s))
 	{
 	}
