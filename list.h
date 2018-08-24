@@ -5,6 +5,7 @@
 #include <initializer_list>
 #include <functional> 
 #include <iostream> 
+#include <optional>
 #include <tuple> 
 #include "utility.h" 
 //singly linked list 
@@ -211,7 +212,7 @@ public:
 		   return *this;
 
 		if(length() < 2)
-			return b.push(peek());
+			return b.push_back(peek());
 
 		return b.foldr( [](const auto a, const auto list){ return a + list;}, *this);
 
@@ -246,19 +247,21 @@ public:
 		return reverseBuilder();
 	}
 
-	List splitBuilder (const List in , const int end, const List out = List(nullptr)) const 
+	List sliceBuilder (const List in , const int end, const List out = List(nullptr)) const 
 	{
 		if(end == 0)
 			return out.push(in.peek()); 
 
 
-		return splitBuilder( in.pop(), end - 1, out.push(in.peek()));
+		return sliceBuilder( in.pop(), end - 1, out.push(in.peek()));
 	}
 		
 		
 
-	List split (int start , int end = length() + 1) const
+	List slice (int start , std::optional<int> endp = std::nullopt) const
 	{
+		const int end =  endp ? *endp : length() - 1;
+
 		if(start < 0 || end +1 > length())
 			throw std::out_of_range("trying to split out of range");
 
@@ -266,10 +269,10 @@ public:
 			throw std::out_of_range("start of split is after end");
 			
 		if(start > 0)
-			return pop().split( start - 1, end -1);
+			return pop().slice( start - 1, end -1);
 
 		if(end - start < length()- 1)
-			return splitBuilder(*this, end).reverse();
+			return sliceBuilder(*this, end).reverse();
 
 		return *this;
 	}
@@ -287,6 +290,25 @@ public:
 		return  pop().find(res);
 	}
 
+	List<List<T>> split (T res, int l = -1) const
+	{
+		return splitHelper(res, l).filter([](const auto l){ return l.length();});
+	}
+
+	List< List<T>> splitHelper (T res, int l , List<T> stack = List<T>(nullptr), List< List<T>> output = List<List<T>>(nullptr) ) const 
+	{
+		if( length() == 0)
+			return output + stack; 
+
+		if( l == 0)
+			return (output + stack) + *this;
+
+		if( peek() != res)
+			return pop().splitHelper(res, l, stack + peek(), output);
+
+		return pop().splitHelper(res, l - 1, List<T>(nullptr), output + stack); 
+	};
+
 	List find (const List<T> l) const
 	{
 		if (l.length() == 0)
@@ -303,8 +325,6 @@ public:
 
 		return pop().find(l);
 	}
-
-
 
 	template <typename F = T(T)>
 	List map (const F fun) const

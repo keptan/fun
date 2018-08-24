@@ -39,8 +39,8 @@ List<T> mergeOrdered (const List<T> a, const List<T> b, const F compare = ordOve
 
 	const auto c = [&](const auto first, const auto second){ return compare(first.peek(), second.peek());};
 
-	const List<T> larger =  max(a,b,c);
-	const List<T> smaller = min(a,b,c);
+	const List<T> larger =  ::max(a,b,c);
+	const List<T> smaller = ::min(a,b,c);
 
 	return smaller.peek() + mergeOrdered( smaller.pop(), larger, compare);
 }
