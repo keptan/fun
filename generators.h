@@ -64,13 +64,15 @@ class IteratorStream
 class Integers 
 {
 	const int i, last; 
+	const bool ended;
 
 	public:
 	using ValueType = int; 
 
-	Integers (std::optional<int> start = std::nullopt, std::optional<int> e = std::nullopt) 
+	Integers (std::optional<int> start = std::nullopt, std::optional<int> e = std::nullopt, bool re = false) 
 		: i(start.value_or(0))
 		, last ( e.value_or( std::numeric_limits<int>::max()))
+		, ended(re)
 	{
 	}
 
@@ -81,15 +83,17 @@ class Integers
 
 	bool end (void) const 
 	{
-		return i == last;
+		return ended;
 	}
 
 	Integers next (void) const 
 	{
-		if(i > last)
-			return Integers( i - 1, last);
+		const bool repEnded = i == last;
 
-		return Integers( i + 1, last);
+		if(i > last)
+			return Integers( i - 1, last , repEnded);
+
+		return Integers( i + 1, last , repEnded);
 	}
 };
 
