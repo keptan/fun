@@ -2,6 +2,7 @@
 #define STRING_H 
 
 #include "list.h" 
+#include <string>
 
 
 
@@ -34,6 +35,11 @@ public:
 	String (const List<char> l)
 		: List<char>(l)
 	{}
+
+	std::string string (void)
+	{
+		return foldr( [](const auto a, std::string s){ return a + s;}, std::string());
+	}
 };
 
 
