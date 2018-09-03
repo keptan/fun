@@ -36,7 +36,7 @@ class CollectListInstance
 
 
 template<typename S>
-CollectListInstance<typename S::ValueType, S> operator | (S left, const CollectList& right)
+List<typename S::ValueType> operator | (S left, const CollectList& right)
 {
 	return CollectListInstance<typename S::ValueType, S>(left);
 }
