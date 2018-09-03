@@ -270,7 +270,7 @@ class FilterInstance
 	const Stream stream; 
 	const F fun;
 
-	Stream nextStream (Stream s) const 
+	Stream nextStream (const Stream s) const 
 	{
 		if(s.end()) return s;
 		if(fun(s.get())) return s;
@@ -309,8 +309,73 @@ auto operator | (Stream left, const Filter<F>& right) -> FilterInstance<typename
 	return FilterInstance<typename Stream::ValueType, Stream, F>(left, right);
 }
 
+template< typename F, typename V>
+struct Fold 
+{
+	using FunctionType = F;
+	using ValueType = V;
+	const F fun; 
+	const V val;
+
+	Fold (const F f, const V v)
+		: fun(f), val(v)
+	{}
+};
+
+template <typename Value, typename Stream, typename F>
+class FoldInstance 
+{
+	const Stream stream; 
+	const F fun; 
+	const bool over; 
+	const Value init;
+
+	Value streamEater ( const Stream s, const Value v) const
+	{
+		if(s.end()) return v;
+		return streamEater(s.next(), fun(s.get(), v));
+	}
 
 
+	public:
+	using ValueType = Value; 
+	using FunctionType = F; 
+	using StreamType = Stream; 
+
+	FoldInstance ( const Stream s, const Fold<F, typename Stream::ValueType> f)
+		: stream(s), fun(f.fun), init(f.val), over(false)
+	{}
+
+	FoldInstance ( const Stream s, F f, Value v, bool o)
+		: stream(s), fun(f), init(v), over(o)
+	{}
+
+	Value get (void) const
+	{
+		return streamEater (stream, init);
+	}
+
+	bool end (void) const 
+	{
+		return over || stream.end();
+	}
+
+	FoldInstance next (void) const 
+	{
+		return FoldInstance( stream, fun, init,  true);
+	}
+};
+
+template< typename Stream, typename F>
+auto operator | (Stream left, const Fold<F, typename Stream::ValueType>& right) -> FoldInstance<decltype( right.fun(left.get(), right.val)), Stream, F>
+{
+	return FoldInstance< decltype(right.fun(left.get(), right.val)), Stream, F> ( left, right);
+}
+
+
+
+
+		
 
 
 
