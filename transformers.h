@@ -1,5 +1,6 @@
 #pragma once 
 #include <tuple> 
+
 struct Take 
 {
 	const size_t quant; 
@@ -250,6 +251,62 @@ auto operator | (const InputStream left, const Product<ParamStream>& right)
 	-> ProductInstance< InputStream, typename Product<ParamStream>::StreamType>
 {
 	return ProductInstance(left, right.stream);
+}
+
+template <typename F>
+struct Filter 
+{
+	using FunctionType = F;
+	const F fun; 
+
+	Filter (const F f)
+		: fun(f)
+	{}
+};
+
+template <typename Value, typename Stream, typename F>
+class FilterInstance 
+{
+	const Stream stream; 
+	const F fun;
+
+	Stream nextStream (Stream s) const 
+	{
+		if(s.end()) return s;
+		if(fun(s.get())) return s;
+
+		return nextStream(s.next());
+	}
+
+	public:
+	using ValueType = Value; 
+	using FunctionType = F;
+	using StreamType = Stream; 
+
+	FilterInstance (const Stream s, const Filter<F> f)
+		: stream(s), fun(f.fun)
+	{}
+
+	Value get (void) const 
+	{
+		return stream.get();
+	}
+
+	bool end (void) const 
+	{
+		return stream.end();
+	}
+
+	FilterInstance next (void) const 
+	{
+		return FilterInstance( nextStream(stream.next()), fun);
+	}
+};
+
+template< typename Stream, typename F>
+auto operator | (Stream left, const Filter<F>& right) -> FilterInstance<typename Stream::ValueType, Stream, F>
+{
+	return FilterInstance<typename Stream::ValueType, Stream, F>(left, right);
 }
 
 

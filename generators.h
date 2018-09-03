@@ -88,7 +88,7 @@ class Integers
 
 	Integers next (void) const 
 	{
-		const bool repEnded = i == last;
+		const bool repEnded = (i == last);
 
 		if(i > last)
 			return Integers( i - 1, last , repEnded);
