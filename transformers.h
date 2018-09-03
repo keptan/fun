@@ -284,7 +284,7 @@ class FilterInstance
 	using StreamType = Stream; 
 
 	FilterInstance (const Stream s, const Filter<F> f)
-		: stream(s), fun(f.fun)
+		: stream( nextStream(s)), fun(f.fun)
 	{}
 
 	Value get (void) const 
@@ -299,7 +299,7 @@ class FilterInstance
 
 	FilterInstance next (void) const 
 	{
-		return FilterInstance( nextStream(stream.next()), fun);
+		return FilterInstance( stream.next(), fun);
 	}
 };
 
