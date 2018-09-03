@@ -342,7 +342,7 @@ class FoldInstance
 	using FunctionType = F; 
 	using StreamType = Stream; 
 
-	FoldInstance ( const Stream s, const Fold<F, typename Stream::ValueType> f)
+	FoldInstance ( const Stream s, const Fold<F, Value> f)
 		: stream(s), fun(f.fun), init(f.val), over(false)
 	{}
 
@@ -366,10 +366,10 @@ class FoldInstance
 	}
 };
 
-template< typename Stream, typename F>
-auto operator | (Stream left, const Fold<F, typename Stream::ValueType>& right) -> FoldInstance<decltype( right.fun(left.get(), right.val)), Stream, F>
+template< typename Stream, typename F, typename V>
+auto operator | (Stream left, const Fold<F,V >& right) -> FoldInstance<V, Stream, F>
 {
-	return FoldInstance< decltype(right.fun(left.get(), right.val)), Stream, F> ( left, right);
+	return FoldInstance< V , Stream, F> ( left, right);
 }
 
 
