@@ -267,8 +267,8 @@ struct Filter
 template <typename Value, typename Stream, typename F>
 class FilterInstance 
 {
-	const Stream stream; 
 	const F fun;
+	const Stream stream; 
 
 	Stream nextStream (const Stream s) const 
 	{
@@ -283,9 +283,10 @@ class FilterInstance
 	using FunctionType = F;
 	using StreamType = Stream; 
 
-	FilterInstance (const Stream s, const Filter<F> f)
-		: stream( nextStream(s)), fun(f.fun)
+	FilterInstance (const Stream s, const F f)
+		: fun(f), stream( nextStream(s))
 	{}
+
 
 	Value get (void) const 
 	{
@@ -306,7 +307,7 @@ class FilterInstance
 template< typename Stream, typename F>
 auto operator | (Stream left, const Filter<F>& right) -> FilterInstance<typename Stream::ValueType, Stream, F>
 {
-	return FilterInstance<typename Stream::ValueType, Stream, F>(left, right);
+	return FilterInstance<typename Stream::ValueType, Stream, F>(left, right.fun);
 }
 
 template< typename F, typename V>
