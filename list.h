@@ -436,6 +436,25 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 		return a.push_back(b);
 	}
 
+	template<typename T>
+	bool operator > (const List<T> a, const List<T> b)
+	{
+		if(a.length() && !b.length()) return true; 
+		if(!a.length() || !b.length()) return false; 
+		if( a.peek() > b.peek()) return true; 
+
+		return a.pop() > b.pop();
+	}
+
+
+	template<typename T>
+	bool operator < (const List<T> a, const List<T> b)
+	{
+		return ( b > a);
+	}
+
+
+
 
 	//replace with an IO monad or something
 	template<typename T>
@@ -537,6 +556,7 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 		return  sortedInput.pop().foldr(zipAdd<T>, initTupleList);
 	}
 
+	
 
 #endif
 
