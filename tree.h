@@ -256,7 +256,7 @@ public:
 		return *this;
 	}
 
-	List<T> toList (const List<T> list = List<T>(nullptr)) const
+	List<T> toList (const List<T> list = List<T>()) const
 	{
 		if (head == nullptr)
 			return list;
@@ -342,6 +342,7 @@ public:
 	};
 
 };
+
 
 /*
 //should these be implicit conversions?
