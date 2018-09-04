@@ -36,7 +36,7 @@ public:
 		: List<char>(l)
 	{}
 
-	std::string string (void)
+	std::string string (void) const
 	{
 		return foldr( [](const auto a, std::string s){ return a + s;}, std::string());
 	}
