@@ -32,7 +32,7 @@ class ListStream
 	{}
 };
 
-template <typename IT, typename T = typename std::iterator_traits<IT>::value_type>
+template <typename IT, typename T = IT>
 class IteratorStream 
 {
 	const IT begin, end_;
@@ -42,7 +42,7 @@ class IteratorStream
 
 	T get (void) const 
 	{
-		return *begin; 
+		return begin; 
 	}
 
 	bool end (void) const 
@@ -60,6 +60,8 @@ class IteratorStream
 	{}
 
 };
+
+
 
 class Integers 
 {
