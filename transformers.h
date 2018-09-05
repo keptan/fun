@@ -45,6 +45,57 @@ TakeInstance<typename S::ValueType, S> operator | (S left, const Take& right)
 	return TakeInstance<typename S::ValueType , S>(left, right);
 }
 
+struct Skip 
+{
+	const size_t quant; 
+
+	Skip (size_t q)
+		: quant(q)
+	{}
+};
+
+template<typename T, typename S>
+class SkipInstance 
+{
+
+	const S stream; 
+
+	S skip (const S s, const size_t q) const
+	{
+		if(q == 0 || s.end())
+			return s; 
+
+		return skip (s.next(), q - 1);
+	}
+
+	public:
+	using ValueType = T;
+	T get (void) const
+	{
+	   	return stream.get();
+	}
+
+	bool end (void) const
+	{
+	   	return stream.end();
+	}
+
+	SkipInstance  next (void) const
+	{
+		return SkipInstance( stream.next(), 0);
+	}
+
+	SkipInstance  (const S s, const size_t q)
+		: stream( skip(s, q))
+	{}
+};
+
+template<typename S>
+SkipInstance<typename S::ValueType, S> operator | (S left, const Skip& right)
+{
+	return SkipInstance<typename S::ValueType, S>(left, right.quant);
+};
+
 template<typename F>
 struct Map 
 {
@@ -352,6 +403,11 @@ class FoldInstance
 	{}
 
 	Value get (void) const
+	{
+		return streamEater (stream, init);
+	}
+
+	Value eval (void) const 
 	{
 		return streamEater (stream, init);
 	}
