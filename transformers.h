@@ -125,6 +125,26 @@ struct RecursiveMap
 	{}
 };
 
+template<typename F>
+auto map (const RecursiveMap<F> m) -> RecursiveMap< RecursiveMap<F>>
+{
+	std::cout << "double recursive map being formed" << std::endl;
+	return RecursiveMap<RecursiveMap<F>>(m);
+}
+
+template<typename F>
+auto map (const Map<F> m) -> RecursiveMap<Map<F>>
+{
+	return RecursiveMap<Map<F>>(m);
+}
+
+template<typename F>
+auto map (const F m) -> Map<F>
+{
+	return Map<F>(m);
+}
+
+
 
 template<typename Value, typename Stream, typename F>
 class MapInstance
@@ -174,7 +194,7 @@ template<typename Container, typename Stream, typename MInstance>
 class RecursiveMapInstance
 {
 	const Stream stream; 
-	const MInstance map; 
+	const MInstance _map; 
 
 	public: 
 	using ValueType = Container;
@@ -182,12 +202,12 @@ class RecursiveMapInstance
 	using StreamType = Stream; 
 
 	RecursiveMapInstance ( const Stream s, const MInstance m)
-		: stream(s), map(m)
+		: stream(s), _map(m)
 	{}
 
 	Container get (void) const 
 	{
-		return Range(stream.get()) | map | Collect<Container>();
+		return Range(stream.get()) >> _map | Collect<Container>();
 	}
 
 	bool end (void) const 
@@ -197,19 +217,19 @@ class RecursiveMapInstance
 
 	RecursiveMapInstance next (void) const 
 	{
-		return RecursiveMapInstance ( stream.next(), map);
+		return RecursiveMapInstance ( stream.next(), _map);
 	}
 };
 
 template< typename Stream, typename M>
-auto operator | (Stream left, const RecursiveMap<M>& right) 
+auto operator >> (Stream left, const RecursiveMap<M>& right) 
 -> RecursiveMapInstance< typename Stream::ValueType, Stream, M>
 {
 	return RecursiveMapInstance< typename Stream::ValueType, Stream, M>(left, right.map);
 };
 
 template<typename Stream, typename F>
-auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
+auto operator >> (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
 {
 	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
 	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
@@ -240,21 +260,6 @@ auto operator >> (Stream left, const Map<F>& right) ->
 //	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
 }
 */
-
-template<typename F>
-auto map (const Map<F> m) -> RecursiveMap<Map<F>>
-{
-	return RecursiveMap<Map<F>>(m);
-}
-
-template<typename F>
-auto map (const F m) -> Map<F>
-{
-	return Map<F>(m);
-}
-
-
-
 
 template <typename Stream>
 struct Zip 
