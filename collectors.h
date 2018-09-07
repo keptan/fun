@@ -41,4 +41,17 @@ List<typename S::ValueType> operator | (S left, const CollectList& right)
 	return CollectListInstance<typename S::ValueType, S>(left);
 }
 
+//SFINAE to detect if we're collecting a list or what 
+template <typename T, 
+		  typename = std::enable_if< 
+		std::is_same<
+					typename List<T>::DataType, T
+					>::value
+									>
+		>
+CollectList Collect (void) 
+{
+	return CollectList();
+}
+
 

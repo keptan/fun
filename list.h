@@ -30,7 +30,8 @@ struct ListNode
 template <typename T>
 struct List 
 {
-	using DataType = T;
+public: using DataType = T;
+private:
 	std::shared_ptr<ListNode<T>> head; 
 
 	List reverseBuilder (const List l = List( List::SharedNode(nullptr))) const 

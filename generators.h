@@ -132,3 +132,16 @@ class UniformDist
 		return *this;
 	}
 };
+
+template <typename T> 
+auto Range ( const List<T> l) -> ListStream<T>
+{
+	return ListStream<T>(l);
+}
+
+template <typename T, typename IT = typename T::const_iterator>
+auto Range (const T container) -> IteratorStream<IT> 
+{
+	return IteratorStream<IT>(container.begin(), container.end());
+}
+

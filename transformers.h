@@ -1,5 +1,8 @@
 #pragma once 
 #include <tuple> 
+#include <type_traits>
+#include "generators.h"
+#include "collectors.h" 
 
 struct Take 
 {
@@ -104,8 +107,24 @@ struct Map
 
 	Map (const F f)
 		: fun(f)
+	{
+	}
+
+
+};
+
+template<typename M>
+struct RecursiveMap 
+{
+	using MapType = M; 
+
+	const M map; 
+
+	RecursiveMap ( const M m)
+		: map(m)
 	{}
 };
+
 
 template<typename Value, typename Stream, typename F>
 class MapInstance
@@ -139,12 +158,103 @@ class MapInstance
 
 };
 
+
+/*
 template<typename Stream, typename F>
 auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
 {
 	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
 	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
 }
+*/
+
+
+
+template<typename Container, typename Stream, typename MInstance>
+class RecursiveMapInstance
+{
+	const Stream stream; 
+	const MInstance map; 
+
+	public: 
+	using ValueType = Container;
+	using FunctionType = MInstance;
+	using StreamType = Stream; 
+
+	RecursiveMapInstance ( const Stream s, const MInstance m)
+		: stream(s), map(m)
+	{}
+
+	Container get (void) const 
+	{
+		return Range(stream.get()) | map | Collect<Container>();
+	}
+
+	bool end (void) const 
+	{
+		return stream.end();
+	}
+
+	RecursiveMapInstance next (void) const 
+	{
+		return RecursiveMapInstance ( stream.next(), map);
+	}
+};
+
+template< typename Stream, typename M>
+auto operator | (Stream left, const RecursiveMap<M>& right) 
+-> RecursiveMapInstance< typename Stream::ValueType, Stream, M>
+{
+	return RecursiveMapInstance< typename Stream::ValueType, Stream, M>(left, right.map);
+};
+
+template<typename Stream, typename F>
+auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
+{
+	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
+	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
+}
+
+/*
+template<typename Stream, typename F >
+auto operator >> (Stream left, const Map<F>& right) ->  
+		typename std::enable_if< 
+								std::is_base_of<MapTag ,F>::value , 
+								RecursiveMapInstance< typename Stream::ValueType, Stream, F> 
+								void>::type
+{
+	//return RecursiveMapInstance<typename Stream::ValueType, Stream, F>(left, right.fun);
+	std::cout << "recursive map instance" << std::endl;
+}
+
+template<typename Stream, typename F>
+auto operator >> (Stream left, const Map<F>& right) ->
+			typename std::enable_if< 
+						( std::is_invocable< F, typename Stream::ValueType>::value && 
+						(!std::is_base_of<MapTag, F>::value)) , 
+						 MapInstance< decltype(right.fun( left.get())), Stream, F> / 
+						void>::type
+{
+	std::cout << "non recursive map instance " << std::endl;
+
+//	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
+}
+*/
+
+template<typename F>
+auto map (const Map<F> m) -> RecursiveMap<Map<F>>
+{
+	return RecursiveMap<Map<F>>(m);
+}
+
+template<typename F>
+auto map (const F m) -> Map<F>
+{
+	return Map<F>(m);
+}
+
+
+
 
 template <typename Stream>
 struct Zip 
