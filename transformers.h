@@ -207,7 +207,7 @@ class RecursiveMapInstance
 
 	Container get (void) const 
 	{
-		return Range(stream.get()) >> _map | Collect<Container>();
+		return Range(stream.get()) | _map | Collect<Container>();
 	}
 
 	bool end (void) const 
@@ -222,14 +222,14 @@ class RecursiveMapInstance
 };
 
 template< typename Stream, typename M>
-auto operator >> (Stream left, const RecursiveMap<M>& right) 
+auto operator | (Stream left, const RecursiveMap<M>& right) 
 -> RecursiveMapInstance< typename Stream::ValueType, Stream, M>
 {
 	return RecursiveMapInstance< typename Stream::ValueType, Stream, M>(left, right.map);
 };
 
 template<typename Stream, typename F>
-auto operator >> (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
+auto operator | (Stream left, const Map<F>& right) -> MapInstance<decltype( right.fun(left.get())), Stream, F>
 {
 	return MapInstance<decltype( right.fun(left.get())), Stream, F>(left, right);
 	//return MapInstance<typename Stream::ValueType, Stream, F>(left, right);
@@ -545,9 +545,105 @@ auto operator | (Stream left, const Fold<F,V >& right) -> FoldInstance<V, Stream
 }
 
 
+struct Length 
+{};
+
+template <typename Stream>
+class LengthInstance 
+{
+	const Stream stream; 
+	//some kind of static memoization would be nice desu 
+	
+	int streamEater (const Stream s, const int i = 0) const 
+	{
+		if(s.end()) return i; 
+		return streamEater(s.next(), i + 1);
+	}
+
+	public: 
+	using StreamType = Stream;
+
+	LengthInstance (const Stream s)
+		: stream(s)
+	{};
+
+	
+	int get (void) const 
+	{
+		return streamEater(stream); 
+	}
+
+	int eval (void) const 
+	{
+		return get(); 
+	}
+
+	bool end (void) const 
+	{
+		return false; 
+	}
+
+	LengthInstance next (void) const 
+	{
+		return *this; 
+	}
+};
+
+template <typename Stream> 
+auto operator | (Stream left, const Length& right) -> LengthInstance<Stream> 
+{
+	return LengthInstance<Stream>(left);
+}
+
+struct Unique 
+{};
+
+template <typename Value, typename Stream>
+class UniqueInstance 
+{
+
+	const Tree<Value> set; 
+	const Stream stream; 
+
+	Stream nextStream (const Stream s) const 
+	{
+		if(s.end()) return s;
+		if(!set.contains(s.get())) return s; 
+
+		return nextStream(s.next()); 
+	}
+
+	public:
+	using ValueType = Value; 
+	using StreamType = Stream; 
+
+	UniqueInstance (const Stream s, const Tree<Value> t = Tree<Value>())
+		: set(t), stream( nextStream(s)) 
+	{}
+
+	Value get (void) const 
+	{
+		return stream.get();
+	}
+
+	bool end (void) const 
+	{
+		return stream.end(); 
+	}
+
+	UniqueInstance next (void) const 
+	{
+		return UniqueInstance( stream.next(), set.push( stream.get()));
+	}
+};
+
+template <typename Stream>
+auto operator | (Stream left, const Unique& right) -> UniqueInstance<typename Stream::ValueType, Stream>
+{
+	return UniqueInstance<typename Stream::ValueType, Stream>(left);
+}
 
 
-		
 
 
 
