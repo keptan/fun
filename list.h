@@ -77,6 +77,15 @@ private:
 		}
 	};
 
+	List initBuild (const std::initializer_list<T> init, const int pos = 0) //crappy {} constructor, make it a member with a helper function
+	{
+		if(pos + 1 > init.size())
+			return List<T>();
+
+		return List(*(init.begin() + pos)).push( initBuild(init, pos + 1)); 
+	}
+
+
 
 public:
 
@@ -99,12 +108,18 @@ public:
 		: head(a.head)
 	{}
 
+	List (const std::initializer_list<T> l) 
+		: head(initBuild(l).reverse().head)
+	{}
+
 
 	List& operator = (const List& a)
 	{
 		head = a.head;
 		return *this;
 	}
+
+
 
 	Iterator begin (void)
 	{
@@ -248,7 +263,7 @@ public:
 		return reverseBuilder();
 	}
 
-	List sliceBuilder (const List in , const int end, const List out = List(nullptr)) const 
+	List sliceBuilder (const List in , const int end, const List out = List()) const 
 	{
 		if(end == 0)
 			return out.push(in.peek()); 
@@ -296,7 +311,7 @@ public:
 		return splitHelper(res, l).filter([](const auto l){ return l.length();});
 	}
 
-	List< List<T>> splitHelper (T res, int l , List<T> stack = List<T>(nullptr), List< List<T>> output = List<List<T>>(nullptr) ) const 
+	List< List<T>> splitHelper (T res, int l , List<T> stack = List<T>(), List< List<T>> output = List<List<T>>() ) const 
 	{
 		if( length() == 0)
 			return output + stack; 
@@ -307,13 +322,13 @@ public:
 		if( peek() != res)
 			return pop().splitHelper(res, l, stack + peek(), output);
 
-		return pop().splitHelper(res, l - 1, List<T>(nullptr), output + stack); 
+		return pop().splitHelper(res, l - 1, List<T>(), output + stack); 
 	};
 
 	List find (const List<T> l) const
 	{
 		if (l.length() == 0)
-			return List(nullptr); 
+			return List(); 
 
 		if (length() == 0)
 			return *this;
@@ -331,7 +346,7 @@ public:
 	List map (const F fun) const
 	{
 		if (length() == 0)
-			return List(nullptr);
+			return List();
 
 		if (length() == 1)
 			return List( fun( peek()));
@@ -505,12 +520,12 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 			return std::make_tuple(first, second);
 		};
 
-		//const List< List<T>> out = a.foldr( [](const T in, const List< List<T>> out){ return out.push( List<T>(in));}, List< List<T>>(nullptr));
+		//const List< List<T>> out = a.foldr( [](const T in, const List< List<T>> out){ return out.push( List<T>(in));}, List< List<T>>());
 		const auto larger = a.length() > b.length() ? a : b;
 		const auto smaller = a.length() > b.length() ? b : a;
 
-		const auto initTupleList = larger.foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>(nullptr));
-		const auto finalTuple = smaller.foldl( doubleZip, std::make_tuple(initTupleList, List<List<T>>(nullptr)));
+		const auto initTupleList = larger.foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>());
+		const auto finalTuple = smaller.foldl( doubleZip, std::make_tuple(initTupleList, List<List<T>>()));
 
 		return std::get<1>(finalTuple) + std::get<0>(finalTuple);
 	}
@@ -540,7 +555,7 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 			return std::make_tuple(first, second);
 		};
 
-		const auto finalTuple = input.foldl( tupleZip, std::make_tuple(output, List<List<T>>(nullptr)));
+		const auto finalTuple = input.foldl( tupleZip, std::make_tuple(output, List<List<T>>()));
 		return (std::get<0>(finalTuple).reverse() + std::get<1>(finalTuple)).reverse();
 		//return (std::get<1>(finalTuple)) + std::get<0>(finalTuple)).reverse();
 	}
@@ -550,9 +565,9 @@ List<T> mergeSort (const List<T> l, const Ord<T> compare = ordOverload);
 	List<List<T>> superZip (const List<T> first, A... rest)
 	{
 	
-		const auto sortedInput = vSortInput( List<List<T>>(nullptr), first, rest...);
+		const auto sortedInput = vSortInput( List<List<T>>(), first, rest...);
 
-		const auto initTupleList = sortedInput.peek().foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>(nullptr));
+		const auto initTupleList = sortedInput.peek().foldr( [](const T in, const auto out){ return out.push( List<T>(in));}, List<List<T>>());
 
 		return  sortedInput.pop().foldr(zipAdd<T>, initTupleList);
 	}
