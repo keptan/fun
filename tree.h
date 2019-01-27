@@ -2,6 +2,7 @@
 #define NIAVE_TREE_H 
 #include "utility.h" 
 #include "list.h"
+#include <initializer_list>
 
 //node that holds resource and points to other members
 //shared by different trees (persistent tree)
@@ -116,7 +117,6 @@ class Tree
 	Tree doubleRotateRight (void) const
 	{
 		return Tree(head->res, Tree(head->left).rotateLeft().head , head->right).rotateRight();
-
 	};
 
 	Tree doubleRotateLeft (void) const
@@ -228,8 +228,6 @@ public:
 		:head(h)
 	{}
 
-
-
 	explicit Tree (T res)
 		: head(std::make_shared<Node>(res))
 	{}
@@ -249,6 +247,12 @@ public:
 	Tree (const Tree&& a)
 		: head(a.head)
 	{}
+
+	Tree (const List<T> l)
+		: Tree( l.foldr( [](const T i, const Tree<T> a){return a.push(i);}, Tree<T>()))
+	{
+	}
+
 
 	Tree& operator = (const Tree& a)
 	{
@@ -324,10 +328,8 @@ public:
 	}
 
 
-
-
-
-	bool contains (const T res) const
+	template <typename Comparable>
+	bool contains (const Comparable res) const
 	{
 		if(head == nullptr)
 			return false;
@@ -341,6 +343,7 @@ public:
 		return true;
 	};
 
+	
 };
 
 
