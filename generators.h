@@ -97,7 +97,54 @@ class Integers
 
 		return Integers( i + 1, last , repEnded);
 	}
+
+
+
+	friend bool operator == (const Integers &a, const Integers &b)
+	{
+		return (a.i == b.i && a.last == b.last);
+	}
+
+	//range is entirely above this range 
+	friend bool operator > (const Integers &a, const Integers &b)
+	{
+		return (a.i > b.i && a.last > b.last);
+	}
+
+	//range is entirely below another range 
+	friend bool operator < (const Integers &a, const Integers &b)
+	{
+		return (a.i < b.i && a.last < b.last);
+	}
+
+	//integer is out the top, or outside the bottom of a range
+	friend bool operator > (const int a, const Integers &b)
+	{
+		return (a > b.last && a > b.i);
+	}
+
+	friend bool operator > (const Integers &a, const int b)
+	{
+		return (a.last > b && a.i > b);
+	}
+
+	friend bool operator < (const int a, const Integers &b)
+	{
+		return (a < b.i && a < b.last);
+	}
+
+	friend bool operator < (const Integers &a, const int b)
+	{
+		return (a.i < b && a.last < b);
+	}
+
+
 };
+
+/*comparison operators, can be used to decide if a range contains another range,
+ * is larger than a range, or is entirely below a range of integers */ 
+
+
 
 class UniformDist 
 {
