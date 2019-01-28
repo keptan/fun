@@ -2,11 +2,11 @@
 #define UTILITY_H
 
 
-template <typename T>
-using Ord  = bool(T,T);
+template <typename A, typename B = A>
+using Ord  = bool(A,B);
 
-template <typename T>
-bool ordOverload (const T a, const T b)
+template <typename A, typename B>
+bool ordOverload (const A a, const B b)
 {
 	return a > b;
 }
