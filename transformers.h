@@ -643,7 +643,58 @@ auto operator | (Stream left, const Unique& right) -> UniqueInstance<typename St
 	return UniqueInstance<typename Stream::ValueType, Stream>(left);
 }
 
+template <typename Stream>
+class FlattenInstance 
+{
+	const Stream stream; 
+	const int skipCount;
+
+	Stream skipBlank (const Stream s)
+	{
+		if(s.end()) return s;
+
+		if (s.get().end())
+			return s.next();
+
+		return s;
+	}
+
+	public:
+	using ValueType = typename Stream::ValueType::ValueType; 
+	using StreamType = Stream;
 
 
+	FlattenInstance( const Stream s, const int skip = 0)
+		: stream( skipBlank(s)), skipCount(skip)
+	{}
 
+	ValueType get (void) const
+	{
+		return (stream.get() | Skip(skipCount)).get();
+	}
 
+	bool end (void) const
+	{
+		return stream.end();
+	}
+
+	FlattenInstance next (void) const
+	{
+
+		if(skipCount + 1>= (stream.get() | Length()).eval()) return FlattenInstance(stream.next(),0);
+
+		return FlattenInstance(stream, skipCount + 1);
+	}	
+};
+
+struct Flatten 
+{
+	Flatten (void)
+	{}
+};
+
+template<typename S>
+FlattenInstance<S> operator | (S left, const Flatten& right)
+{
+	return FlattenInstance<S>(left);
+}
