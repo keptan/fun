@@ -1,9 +1,12 @@
 #pragma once 
 #include "list.h" 
+#include "string.h"
 #include <iterator>
 #include <optional>
 #include <random>
 #include <limits>
+#include <stdio.h>
+#include <iostream>
 
 template <typename T>
 class ListStream 
@@ -32,6 +35,31 @@ class ListStream
 	{}
 };
 
+//VERY non const 
+ListStream<String> FileLineStream (const String name)
+{
+	List<String> acc; 
+
+	FILE *input = fopen(name.string().c_str(), "r");
+
+	if(!input)
+	{
+		return acc; 
+	}
+
+	char*  line = nullptr;
+	size_t len = 0;
+
+	while((getline(&line, &len, input)) != -1)
+		acc = acc.push(line);
+
+	fclose(input);
+	if(line) free(line);
+
+	return acc;
+}
+	
+
 template <typename IT, typename T = IT>
 class IteratorStream 
 {
@@ -47,7 +75,7 @@ class IteratorStream
 
 	bool end (void) const 
 	{
-		return begin == end_; 
+		return begin >= end_; 
 	}
 
 	IteratorStream next (void) const 
