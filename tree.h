@@ -340,16 +340,27 @@ public:
 		return true;
 	};
 
-	std::optional<T> get (const T res) const
+	template< typename C>
+	std::optional<T> get (const C res) const
 	{
 		if(head == nullptr)
+		{
 			return std::nullopt;
+		}
 
-		if( Compare( head->res, res))
+
+//		if( Compare( head->res, res))
+		if( head->res > res)
+		{
 			return Tree(head->left).get(res);
+		}
 
-		if( Compare( res, head->res))
+
+//		if( Compare( res, head->res))
+		if( head->res < res)
+		{
 			return Tree(head->right).get(res);
+		}
 
 		return head->res;
 	}
