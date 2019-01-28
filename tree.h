@@ -23,14 +23,13 @@ struct TreeNode
 };
 
 //holds a head and some constructors
-template <typename T>
+template <typename T, Ord<T> Compare = ordOverload>
 class Tree 
 {
 
 	using Node = TreeNode<T>;
 	using SharedNode = std::shared_ptr<TreeNode<T>>;
 	SharedNode head; 
-
 
 
 	int readHeight (void) const
@@ -177,7 +176,7 @@ class Tree
 
 		T y = head->res; 
 
-		if(res < y)
+		if(Compare(y, res))
 		{
 			const Tree niaveRemove = Tree(y, Tree(head->left).removeOperation(res).head, head->right);
 			const Tree balanced = niaveRemove.removeBalance(res);
@@ -186,7 +185,7 @@ class Tree
 
 		}
 
-		if(res > y)
+		if(Compare(res, y))
 		{
 			const Tree niaveRemove = Tree(y, head->left, Tree(head->right).removeOperation(res).head);
 			const Tree balanced = niaveRemove.removeBalance(res);
@@ -291,7 +290,7 @@ public:
 
 		T y = head->res; 
 
-		if(res < head->res)
+		if( Compare(head->res, res))
 		{
 			const Tree niaveInsert = Tree(y, Tree(head->left).push(res).head, head->right);
 			const Tree balanced = niaveInsert.insertBalance(res);
@@ -300,7 +299,7 @@ public:
 			return updatedHeight;
 		}
 
-		if(res > head->res)
+		if( Compare(res, head->res))
 		{
 
 			const Tree niaveInsert = Tree(y, head->left , Tree(head->right).push(res).head);
@@ -328,16 +327,15 @@ public:
 	}
 
 
-	template <typename Comparable>
-	bool contains (const Comparable res) const
+	bool contains (const T res) const
 	{
 		if(head == nullptr)
 			return false;
 
-		if(res < head->res)
+		if( Compare( head->res, res))
 			return Tree(head->left).contains(res);
 
-		if(res > head->res)
+		if( Compare( res, head->res))
 			return Tree(head->right).contains(res);
 
 		return true;
