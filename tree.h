@@ -326,7 +326,6 @@ public:
 		return removeOperation(res);
 	}
 
-
 	bool contains (const T res) const
 	{
 		if(head == nullptr)
@@ -341,6 +340,19 @@ public:
 		return true;
 	};
 
+	std::optional<T> get (const T res) const
+	{
+		if(head == nullptr)
+			return std::nullopt;
+
+		if( Compare( head->res, res))
+			return Tree(head->left).get(res);
+
+		if( Compare( res, head->res))
+			return Tree(head->right).get(res);
+
+		return head->res;
+	}
 	
 };
 
