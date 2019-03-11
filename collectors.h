@@ -1,6 +1,30 @@
 #pragma once
 #include "list.h"
 
+template <typename S>
+S evalHelper (const S stream)
+{
+	if(stream.end()) return stream;
+
+	stream.get();
+	return evalHelper( stream.next());
+}
+
+
+template<typename S>
+void eval (S stream)
+{
+	static_assert( 
+			std::is_same<
+					void, typename S::ValueType>::value, 
+			"requires stream with void value type");
+
+	evalHelper( stream);
+}
+
+	
+
+
 struct CollectList{}; 
 
 template<typename T, typename S>
