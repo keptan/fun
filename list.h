@@ -151,6 +151,7 @@ public:
 		return !( *this == a);
 	}
 
+
 	//0 length for empty lists, 1 is just a node, 2+ has tail 
 	int length (void) const
 	{
@@ -166,6 +167,12 @@ public:
 		//inline pop 
 		return 1 + List(head->next).length();
 		*/
+	}
+
+	//bool is length != 0
+	operator bool() const 
+	{
+		return length(); 
 	}
 
 	//a->b .. c->a->b 
