@@ -1,5 +1,5 @@
 # fun
-c++17, header only,  fun library for use in cutegrab 
+c++17,header only pure functional standard lib, with lazy evaluation!
 
 persistent data structures 
 declarative and pure functional style 
