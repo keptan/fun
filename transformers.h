@@ -379,17 +379,17 @@ class ProductInstance
 {
 	const InputStream istream; 
 	const ParamStream pstream;
-	const InputStream start; 
+	const ParamStream start;
 
 	public:
 	using ValueType = Value; 
 	using StreamType = InputStream;
 
 	ProductInstance (const InputStream is, const ParamStream ps)
-		: istream(is), pstream(ps), start(is)
+		: istream(is), pstream(ps), start(ps)
 	{}
 
-	ProductInstance (const InputStream is, const ParamStream ps, const InputStream s)
+	ProductInstance (const InputStream is, const ParamStream ps, const ParamStream s)
 		: istream(is), pstream(ps), start(s)
 	{}
 
@@ -400,15 +400,15 @@ class ProductInstance
 
 	bool end (void) const 
 	{
-		return pstream.end();
+		return  istream.end();
 	}
 
 	ProductInstance next (void) const 
 	{
-		if(istream.end())
-			return  ProductInstance( start, pstream.next(), start);
+		if(pstream.next().end())
+			return  ProductInstance( istream.next(), start);
 
-		return ProductInstance( istream.next(), pstream, start);
+		return ProductInstance( istream, pstream.next(), start);
 	}
 };
 
