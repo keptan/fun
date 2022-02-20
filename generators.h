@@ -220,3 +220,72 @@ auto Range (const T container) -> IteratorStream<IT>
 	return IteratorStream<IT>(container.begin(), container.end());
 }
 
+struct LazyFileStream
+{
+	using ValueType = char; 
+	struct CharList
+	{
+		const char res;
+		mutable std::shared_ptr<CharList> tail;
+		mutable std::shared_ptr<CharList> head;
+
+		CharList (const char c, const std::shared_ptr<CharList> t)
+			: res(c), tail(t)
+		{}
+
+		void push (const char c) const
+		{
+			if(!tail)
+			{
+				tail = std::make_shared<CharList>(c, nullptr);
+				return; 
+			}
+
+			auto i = tail;
+			while(i->tail) i = i->tail;
+
+			i->tail = std::make_shared<CharList>(c, nullptr);
+			return;
+		}
+	};
+
+	const std::shared_ptr<CharList> res; 
+	FILE* const file;
+
+	LazyFileStream (const std::shared_ptr<CharList> c, FILE* f)
+		: res(c), file(f)
+	{}
+
+	char get (void) const
+	{
+		return res->res;
+	}
+
+	bool end (void) const
+	{
+		return res->res == EOF;
+	}
+
+	LazyFileStream next (void) const
+	{
+		if (end()) return LazyFileStream(res, file);
+		if (res->tail) return LazyFileStream(res->tail, file);
+
+
+		const char c = fgetc(file);
+		if(c == EOF) fclose(file);
+
+		res->push(c);
+		return LazyFileStream(res->tail, file);
+	}
+
+};
+
+LazyFileStream fileStream (const char* name)
+{
+		FILE* const file = fopen(name, "r");
+		if(!file) return LazyFileStream( std::make_shared<LazyFileStream::CharList>(EOF, nullptr), file);
+		return LazyFileStream( std::make_shared<LazyFileStream::CharList>(fgetc(file), nullptr), file);
+}
+
+
