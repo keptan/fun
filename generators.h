@@ -289,3 +289,10 @@ LazyFileStream fileStream (const char* name)
 }
 
 
+LazyFileStream fileStream (FILE* f)
+{
+		if(!f) return LazyFileStream( std::make_shared<LazyFileStream::CharList>(EOF, nullptr), f);
+		return LazyFileStream( std::make_shared<LazyFileStream::CharList>(fgetc(f), nullptr), f);
+}
+
+
