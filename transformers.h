@@ -729,7 +729,7 @@ class LoopInstance
 	
 	LoopInstance next (void) const 
 	{
-		if(stream.end()) return LoopInstance (start, start);
+		if(stream.end() || stream.next().end()) return LoopInstance (start, start);
 		return LoopInstance(start, stream.next());
 	}
 };
