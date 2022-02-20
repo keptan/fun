@@ -698,3 +698,47 @@ FlattenInstance<S> operator | (S left, const Flatten& right)
 {
 	return FlattenInstance<S>(left);
 }
+
+struct Loop
+{};
+
+template <typename Value, typename Stream>
+class LoopInstance
+{
+	const Stream start;
+	const Stream stream;
+
+	public:
+	using ValueType = Value;
+	using StreamType = Stream;
+
+	LoopInstance (const Stream st, const Stream s)
+		: start(st), stream(s)
+	{}
+
+	Value get (void) const 
+	{
+		return stream.get();
+	}
+
+
+	bool end (void) const
+	{
+		return false;
+	}
+	
+	LoopInstance next (void) const 
+	{
+		if(stream.end()) return LoopInstance (start, start);
+		return LoopInstance(start, stream.next());
+	}
+};
+
+template <typename Stream>
+auto operator | (Stream left, const Loop& right) -> LoopInstance<typename Stream::ValueType, Stream>
+{
+	return LoopInstance<typename Stream::ValueType, Stream>(left, left);
+}
+
+
+
