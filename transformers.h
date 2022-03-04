@@ -42,11 +42,13 @@ class TakeInstance
 	{}
 };
 
-template<typename S>
+template<typename S> 
+requires IsFunStream<S>
 TakeInstance<typename S::ValueType, S> operator | (S left, const Take& right)
 {
 	return TakeInstance<typename S::ValueType , S>(left, right);
 }
+
 
 struct Skip 
 {
