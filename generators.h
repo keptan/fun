@@ -10,15 +10,6 @@
 #include <iostream>
 #include <concepts>
 
-
-template <typename T>
-concept IsFunStream = requires(T s)
-{
-	{std::as_const(s).get()}  -> std::same_as<typename T::ValueType>;
-	{std::as_const(s).end()}  -> std::same_as<bool>;
-	{std::as_const(s).next()} -> std::same_as<T>;
-};
-
 template <typename T>
 class FunStream
 {
@@ -39,6 +30,18 @@ class FunStream
 		return static_cast<const T*>(this)->next_();
 	}
 };
+
+
+template <typename T>
+concept IsFunStream = requires(T s)
+{
+	std::derived_from<T, FunStream<T>>;
+	{std::as_const(s).get()}  -> std::same_as<typename T::ValueType>;
+	{std::as_const(s).end()}  -> std::same_as<bool>;
+	{std::as_const(s).next()} -> std::same_as<T>;
+};
+
+
 
 template <typename T>
 class ListStream 
