@@ -1,12 +1,44 @@
 #pragma once 
 #include "list.h" 
 #include "string.h"
+#include "tree.h"
 #include <iterator>
 #include <optional>
 #include <random>
 #include <limits>
 #include <stdio.h>
 #include <iostream>
+#include <concepts>
+
+
+template <typename T>
+concept IsFunStream = requires(T s)
+{
+	{std::as_const(s).get()}  -> std::same_as<typename T::ValueType>;
+	{std::as_const(s).end()}  -> std::same_as<bool>;
+	{std::as_const(s).next()} -> std::same_as<T>;
+};
+
+template <typename T>
+class FunStream
+{
+	public: 
+
+	auto get (void) const -> auto
+	{
+		return static_cast<const T*>(this)->get_();
+	}
+
+	auto end (void) const -> bool 
+	{
+		return static_cast<const T*>(this)->end_();
+	}
+
+	auto next (void) const -> T
+	{
+		return static_cast<const T*>(this)->next_();
+	}
+};
 
 template <typename T>
 class ListStream 
@@ -61,32 +93,32 @@ ListStream<String> FileLineStream (const String name)
 	
 
 template <typename IT, typename T = IT>
-class IteratorStream 
+class IteratorStream : public FunStream<IteratorStream<IT, T>>
 {
-	const IT begin, end_;
+	const IT first, last;
 
-	public:
+	public: 
+
+	T get_ (void) const 
+	{
+		return first; 
+	}
+
+	bool end_ (void) const 
+	{
+		return first >= last; 
+	}
+
+	IteratorStream next_ (void) const 
+	{
+		return IteratorStream( first + 1, last);
+	}
+
 	using ValueType = T; 
 
-	T get (void) const 
-	{
-		return begin; 
-	}
-
-	bool end (void) const 
-	{
-		return begin >= end_; 
-	}
-
-	IteratorStream next (void) const 
-	{
-		return IteratorStream( begin + 1, end_);
-	}
-
 	IteratorStream (const IT b, const IT e)
-		:begin(b), end_(e)
+		:first(b), last(e)
 	{}
-
 };
 
 
